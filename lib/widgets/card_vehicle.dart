@@ -1,12 +1,15 @@
+import 'package:college_transport_booking_app/services/database_helper.dart';
 import 'package:flutter/material.dart';
 
 import 'package:college_transport_booking_app/models/model_vehicle.dart';
 import 'package:college_transport_booking_app/widgets/button_dialog.dart';
 import 'package:college_transport_booking_app/widgets/dialog_custom.dart';
 import 'package:college_transport_booking_app/widgets/title_and_text.dart';
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class CardVehicle extends StatefulWidget {
-  const CardVehicle({
+  CardVehicle({
     Key key,
     @required this.vehicle,
   }) : super(key: key);
@@ -16,7 +19,10 @@ class CardVehicle extends StatefulWidget {
   _CardVehicleState createState() => _CardVehicleState();
 }
 
+String dropdownValue = 'Bus';
+
 class _CardVehicleState extends State<CardVehicle> {
+  final dbHelper = DatabaseHelper.instance;
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -24,7 +30,7 @@ class _CardVehicleState extends State<CardVehicle> {
         showDialogVehicleInfo();
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 5.0),
+        padding: EdgeInsets.symmetric(vertical: 5.0),
         child: Card(
           color: Theme.of(context).buttonColor,
           elevation: 2,
@@ -32,7 +38,7 @@ class _CardVehicleState extends State<CardVehicle> {
             borderRadius: BorderRadius.circular(20),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(23.0),
+            padding: EdgeInsets.all(23.0),
             child: Container(
               width: 5,
               child: Column(
@@ -76,13 +82,15 @@ class _CardVehicleState extends State<CardVehicle> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
+        String vehicleType = widget.vehicle.vehicle_type;
         return DialogCustom(
           dialogTitle: 'Vehicle Info',
           contentWidget: [
             SizedBox(width: MediaQuery.of(context).size.width),
             TitleAndText(
               title: 'Vehicle Type',
-              text: widget.vehicle.vehicle_type,
+              text:
+                  '${vehicleType[0].toUpperCase()}${vehicleType.substring(1)}',
             ),
             TitleAndText(
               title: 'Plat Number',
@@ -94,11 +102,133 @@ class _CardVehicleState extends State<CardVehicle> {
             ),
           ],
           footerWidget: [
-            //last
             ButtonDialog(
               label: 'Dismiss',
               onPressed: () {
                 Navigator.pop(context);
+              },
+            ),
+            ButtonDialog(
+              label: 'Edit',
+              fontColor: Theme.of(context).buttonColor,
+              onPressed: () {
+                showDialogManageVehicleInfo();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  showDialogManageVehicleInfo() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        TextEditingController _contPlatNo = TextEditingController()
+          ..text = widget.vehicle.plat_no;
+        TextEditingController _contPassengerNo = TextEditingController()
+          ..text = widget.vehicle.passenger_no.toString();
+
+        return DialogCustom(
+          dialogTitle: 'Edit Vehicle Info',
+          contentWidget: [
+            SizedBox(width: MediaQuery.of(context).size.width),
+            StatefulBuilder(
+              builder: (BuildContext context, StateSetter dropDownState) {
+                return Container(
+                  width: double.infinity,
+                  child: InputDecorator(
+                    decoration: InputDecoration(
+                      labelText: 'Vechicle Type',
+                      hintText: 'Vechicle Type',
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        icon: Icon(Icons.arrow_downward),
+                        underline: Container(
+                          height: 2,
+                          color: Colors.deepPurpleAccent,
+                        ),
+                        onChanged: (String newValue) {
+                          dropdownValue = newValue;
+                          dropDownState(() {
+                            dropdownValue = newValue;
+                            print(
+                                'new value: $newValue ==> dropdown value: $dropdownValue');
+                          });
+                        },
+                        items: <String>['Bus', 'Van']
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                        value: dropdownValue,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 4.0),
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: "Plat Number",
+                ),
+                controller: _contPlatNo,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 4.0),
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: "Passenger Number",
+                ),
+                controller: _contPassengerNo,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              ),
+            ),
+          ],
+          footerWidget: [
+            ButtonDialog(
+              label: 'Dismiss',
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            ButtonDialog(
+              label: 'Apply Changes',
+              fontColor: Theme.of(context).buttonColor,
+              onPressed: () {
+                Map<String, dynamic> dataMap = {
+                  DatabaseHelper.vehicle_type: dropdownValue,
+                  DatabaseHelper.plat_no: _contPlatNo.text,
+                  DatabaseHelper.passenger_no: _contPassengerNo.text,
+                };
+
+                print('vehicle_id: ${widget.vehicle.vehicle_id}');
+                dataMap.forEach((key, value) {
+                  print('$key => $value');
+                });
+
+                dbHelper.updateByHelperCustom(
+                  DatabaseHelper.tb_vehicle,
+                  DatabaseHelper.vehicle_id,
+                  widget.vehicle.vehicle_id,
+                  dataMap,
+                );
+
+                // print('VEHICLE: ${widget.vehicle}');
+
+                Fluttertoast.showToast(msg: 'Vehicle info changes successful!');
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/',
+                  ModalRoute.withName('/'),
+                );
               },
             ),
           ],

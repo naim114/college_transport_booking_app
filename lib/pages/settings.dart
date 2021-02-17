@@ -1,7 +1,7 @@
 import 'package:college_transport_booking_app/models/model_submission.dart';
 import 'package:college_transport_booking_app/models/model_user.dart';
 import 'package:college_transport_booking_app/pages/manage_booking.dart';
-import 'package:college_transport_booking_app/pages/manage_users.dart';
+import 'package:college_transport_booking_app/pages/manage_users_vehicle.dart';
 import 'package:college_transport_booking_app/pages/profile_page.dart';
 import 'package:college_transport_booking_app/services/database_helper.dart';
 import 'package:college_transport_booking_app/services/function_helper.dart';
@@ -131,7 +131,7 @@ class Settings extends StatelessWidget {
                                 context,
                                 MaterialPageRoute(
                                   builder: (BuildContext context) =>
-                                      ManageUsers(),
+                                      ManageUsersVehicles(),
                                 ),
                               );
                             },
