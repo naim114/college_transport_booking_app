@@ -33,6 +33,7 @@ class DatabaseHelper {
   //tb_vehicle
   static final tb_vehicle = 'tb_vehicle';
 
+  static final vehicle_id = 'vehicle_id';
   static final plat_no = 'plat_no';
   static final passenger_no = 'passenger_no';
   static final vehicle_delete_flag = 'vehicle_delete_flag';
@@ -177,7 +178,8 @@ class DatabaseHelper {
         "$user_session INTEGER DEFAULT 0"
         ")");
     await db.execute("CREATE TABLE $tb_vehicle ("
-        "$plat_no TEXT PRIMARY KEY NOT NULL,"
+        "$vehicle_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"
+        "$plat_no TEXT NOT NULL,"
         "$passenger_no INTEGER DEFAULT 0,"
         "$vehicle_type TEXT NOT NULL,"
         "$vehicle_delete_flag INTEGER DEFAULT 0"
@@ -255,6 +257,17 @@ class DatabaseHelper {
     int id = row[columnId];
     return await db
         .update(tableName, row, where: '$columnId = ?', whereArgs: [id]);
+  }
+
+  Future<int> updateByHelperCustom(
+    String tableName,
+    dynamic whereColumn,
+    dynamic columnValue,
+    Map<String, dynamic> row,
+  ) async {
+    Database db = await instance.database;
+    return await db.update(tableName, row,
+        where: '$whereColumn = $columnValue');
   }
 
   Future<int> updateSession(

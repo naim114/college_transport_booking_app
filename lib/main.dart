@@ -15,7 +15,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         fontFamily: 'GothicA1',
         primaryColor: Color.fromRGBO(125, 86, 232, 1), //dark purple
-        accentColor: Color.fromRGBO(86, 154, 232, 1), //blue
+        // accentColor: Color.fromRGBO(86, 154, 232, 1), //blue
+        accentColor: Colors.orangeAccent,
         // highlightColor: Color.fromRGBO(245, 35, 87, 1), //#f52357 //red-pink
         // secondaryHeaderColor: Colors.indigo[900],
         buttonColor: Color.fromRGBO(198, 86, 232, 1), //purple
