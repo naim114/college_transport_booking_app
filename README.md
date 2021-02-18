@@ -1,6 +1,6 @@
 # college_transport_booking_app
 
-A new Flutter project.
+A side project that developed by me. Based on my diploma's final project because i stupidly delete my original work.
 
 ## Getting Started
 
