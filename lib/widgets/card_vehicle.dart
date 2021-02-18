@@ -1,20 +1,23 @@
-import 'package:college_transport_booking_app/services/database_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
+import 'package:college_transport_booking_app/models/model_user.dart';
 import 'package:college_transport_booking_app/models/model_vehicle.dart';
+import 'package:college_transport_booking_app/services/database_helper.dart';
 import 'package:college_transport_booking_app/widgets/button_dialog.dart';
 import 'package:college_transport_booking_app/widgets/dialog_custom.dart';
 import 'package:college_transport_booking_app/widgets/title_and_text.dart';
-import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class CardVehicle extends StatefulWidget {
   CardVehicle({
     Key key,
     @required this.vehicle,
+    @required this.user,
   }) : super(key: key);
 
   final Vehicle vehicle;
+  final User user;
   @override
   _CardVehicleState createState() => _CardVehicleState();
 }
@@ -108,13 +111,15 @@ class _CardVehicleState extends State<CardVehicle> {
                 Navigator.pop(context);
               },
             ),
-            ButtonDialog(
-              label: 'Edit',
-              fontColor: Theme.of(context).buttonColor,
-              onPressed: () {
-                showDialogManageVehicleInfo();
-              },
-            ),
+            widget.user.user_type == 'admin' || widget.user.head_driver == 1
+                ? ButtonDialog(
+                    label: 'Edit',
+                    fontColor: Theme.of(context).buttonColor,
+                    onPressed: () {
+                      showDialogManageVehicleInfo();
+                    },
+                  )
+                : SizedBox(),
           ],
         );
       },
@@ -122,14 +127,13 @@ class _CardVehicleState extends State<CardVehicle> {
   }
 
   showDialogManageVehicleInfo() {
+    final TextEditingController _contPlatNo =
+        TextEditingController(text: widget.vehicle.plat_no);
+    final TextEditingController _contPassengerNo =
+        TextEditingController(text: widget.vehicle.passenger_no.toString());
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        TextEditingController _contPlatNo = TextEditingController()
-          ..text = widget.vehicle.plat_no;
-        TextEditingController _contPassengerNo = TextEditingController()
-          ..text = widget.vehicle.passenger_no.toString();
-
         return DialogCustom(
           dialogTitle: 'Edit Vehicle Info',
           contentWidget: [
@@ -220,8 +224,6 @@ class _CardVehicleState extends State<CardVehicle> {
                   widget.vehicle.vehicle_id,
                   dataMap,
                 );
-
-                // print('VEHICLE: ${widget.vehicle}');
 
                 Fluttertoast.showToast(msg: 'Vehicle info changes successful!');
                 Navigator.pushNamedAndRemoveUntil(
