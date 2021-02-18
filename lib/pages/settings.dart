@@ -16,6 +16,8 @@ class Settings extends StatelessWidget {
     Size size = MediaQuery.of(context).size;
     final User user = Provider.of<User>(context);
     final dbHelper = DatabaseHelper.instance;
+
+    // print('xx head_driver: ${user.head_driver}');
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -38,19 +40,19 @@ class Settings extends StatelessWidget {
               dbHelper.printAllData();
             },
           ),
-          IconButton(
-            icon: Icon(
-              Icons.help,
-              color: Colors.blue,
-            ),
-            onPressed: () async {
-              print('current user id ${user.user_id}');
-              List<Submission> newSub = await dbHelper.getSubmissionByStudentId(
-                studentId: user.user_id,
-              );
-              print('newSub: ${newSub.toString()}');
-            },
-          ),
+          //   IconButton(
+          //     icon: Icon(
+          //       Icons.help,
+          //       color: Colors.blue,
+          //     ),
+          //     onPressed: () async {
+          //       print('current user id ${user.user_id}');
+          //       List<Submission> newSub = await dbHelper.getSubmissionByStudentId(
+          //         studentId: user.user_id,
+          //       );
+          //       print('newSub: ${newSub.toString()}');
+          //     },
+          //   ),
         ],
       ),
       body: Container(
@@ -118,7 +120,7 @@ class Settings extends StatelessWidget {
                           ),
                         )
                       : SizedBox(),
-                  user.user_type == 'admin'
+                  user.user_type == 'admin' || user.head_driver == 1
                       ? Tooltip(
                           message: 'Manage Users & Vehicle',
                           child: ButtonIconRoundedCorner(
@@ -131,7 +133,9 @@ class Settings extends StatelessWidget {
                                 context,
                                 MaterialPageRoute(
                                   builder: (BuildContext context) =>
-                                      ManageUsersVehicles(),
+                                      ManageUsersVehicles(
+                                    currentUser: user,
+                                  ),
                                 ),
                               );
                             },

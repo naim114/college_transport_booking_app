@@ -192,20 +192,18 @@ class _BookingCardState extends State<BookingCard> {
             ),
           ],
           footerWidget: [
+            ButtonDialog(
+              label: 'Dismiss',
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
             //TODO remove certain button depending on situation and user type
             ButtonDialog(
               label: 'Assign Driver',
               fontColor: Theme.of(context).buttonColor,
               onPressed: () {
                 // showDialogManageSub();
-              },
-            ),
-
-            //last
-            ButtonDialog(
-              label: 'Dismiss',
-              onPressed: () {
-                Navigator.pop(context);
               },
             ),
           ],
