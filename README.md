@@ -1,4 +1,4 @@
-# college_transport_booking_app
+# College Transportation Booking App
 
 A side project that developed by me. Based on my diploma's final project because i stupidly delete my original work (the original sucks anyway).
 
@@ -6,7 +6,7 @@ This app will help college students or staff to request transportation usage fro
 
 ## User Type (and their features)
 
-### Super Admin
+#### Super Admin
 - Login
 - Edit their own profile
 - Add Admin
@@ -17,7 +17,7 @@ This app will help college students or staff to request transportation usage fro
 - Promote drivers to be the head drivers
 - View all of drivers schedule
 
-### Admin
+#### Admin
 - Login
 - Edit their own profile
 - Approve or disapprove trip submission
@@ -27,7 +27,7 @@ This app will help college students or staff to request transportation usage fro
 - Promote drivers to be the head drivers
 - View all of drivers schedule
 
-### Head Drivers
+#### Head Drivers
 - Login
 - Edit their own profile
 - Assign drivers and vehicle to trip that approved by admin
@@ -36,13 +36,13 @@ This app will help college students or staff to request transportation usage fro
 - Add Drivers
 - View all of drivers schedule
 
-### Drivers
+#### Drivers
 - Login
 - Edit their own profile
 - View their own schedule
 - Confirm that their trip is finished
 
-### Students
+#### Students
 - Register
 - Login
 - View their own schedule
