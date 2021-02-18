@@ -33,7 +33,7 @@ class _ManageUsersVehiclesState extends State<ManageUsersVehicles> {
   Widget build(BuildContext context) {
     print('xx current user: ${widget.currentUser}');
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
           toolbarHeight: 110.0,
@@ -54,6 +54,7 @@ class _ManageUsersVehiclesState extends State<ManageUsersVehicles> {
               Tab(text: "Student"),
               Tab(text: "Driver"),
               Tab(text: "Vehicle"),
+              Tab(text: "Admin"),
             ],
             indicatorColor: Theme.of(context).primaryColor,
           ),
@@ -75,6 +76,17 @@ class _ManageUsersVehiclesState extends State<ManageUsersVehicles> {
                 },
               ),
             ),
+            widget.currentUser.super_admin == 1
+                ? Tooltip(
+                    message: 'Add Admin',
+                    child: IconButton(
+                      icon: Icon(Icons.admin_panel_settings_outlined),
+                      onPressed: () {
+                        showDialogAddAdmin();
+                      },
+                    ),
+                  )
+                : SizedBox.shrink(),
             Tooltip(
               message: 'Add Vehicle',
               child: IconButton(
@@ -83,7 +95,7 @@ class _ManageUsersVehiclesState extends State<ManageUsersVehicles> {
                   showDialogAddVehicle();
                 },
               ),
-            )
+            ),
           ],
         ),
         body: TabBarView(
@@ -93,8 +105,6 @@ class _ManageUsersVehiclesState extends State<ManageUsersVehicles> {
                 ? FutureBuilder<List<User>>(
                     future: dbHelper.getUserListByType('student'),
                     builder: (context, snapshot) {
-                      // print('student snapshot: ${snapshot.data}');
-
                       return snapshot.hasData
                           ? ListView(
                               padding: EdgeInsets.all(25),
@@ -117,8 +127,6 @@ class _ManageUsersVehiclesState extends State<ManageUsersVehicles> {
             FutureBuilder<List<User>>(
               future: dbHelper.getUserListByType('driver'),
               builder: (context, snapshot) {
-                // print('confirm snapshot: ${snapshot.data}');
-
                 return snapshot.hasData
                     ? ListView(
                         padding: EdgeInsets.all(25),
@@ -137,8 +145,6 @@ class _ManageUsersVehiclesState extends State<ManageUsersVehicles> {
             FutureBuilder<List<Vehicle>>(
               future: dbHelper.getAllVehicle(),
               builder: (context, snapshot) {
-                // print('getAllVehicle snapshot: ${snapshot.data}');
-
                 return snapshot.hasData
                     ? ListView(
                         padding: EdgeInsets.all(25),
@@ -153,6 +159,31 @@ class _ManageUsersVehiclesState extends State<ManageUsersVehicles> {
                     : Center(child: CupertinoActivityIndicator());
               },
             ),
+            //Admin
+            widget.currentUser.user_type == 'admin' &&
+                    widget.currentUser.super_admin == 1
+                ? FutureBuilder<List<User>>(
+                    future: dbHelper.getUserListByType('admin'),
+                    builder: (context, snapshot) {
+                      print('admin snapshot: ${snapshot.data}');
+
+                      return snapshot.hasData
+                          ? ListView(
+                              padding: EdgeInsets.all(25),
+                              children:
+                                  List.generate(snapshot.data.length, (index) {
+                                User driver = snapshot.data[index];
+                                return CardUser(
+                                  user: driver,
+                                  currentUser: widget.currentUser,
+                                );
+                              }),
+                            )
+                          : Center(child: CupertinoActivityIndicator());
+                    },
+                  )
+                : Center(
+                    child: Text('Sorry! Only super admin can view this list')),
           ],
         ),
       ),
@@ -256,7 +287,8 @@ class _ManageUsersVehiclesState extends State<ManageUsersVehicles> {
                 );
                 print('Inserted row id to tb_vehicle $id successful');
 
-                Fluttertoast.showToast(msg: 'Add vehicle successful!');
+                Fluttertoast.showToast(
+                    msg: 'Add vehicle ${_contPlatNo.text} successful!');
                 Navigator.pushNamedAndRemoveUntil(
                   context,
                   '/',
@@ -358,7 +390,111 @@ class _ManageUsersVehiclesState extends State<ManageUsersVehicles> {
                 );
                 print('Inserted row id to tb_vehicle $id successful');
 
-                Fluttertoast.showToast(msg: 'Add driver successful!');
+                Fluttertoast.showToast(
+                    msg: 'Add driver ${contEmail.text} successful!');
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/',
+                  ModalRoute.withName('/'),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  showDialogAddAdmin() {
+    TextEditingController contFullName = TextEditingController();
+    TextEditingController contEmail = TextEditingController();
+    TextEditingController contPhoneNumber = TextEditingController();
+    TextEditingController contPassword = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return DialogCustom(
+          dialogTitle: 'Add Admin',
+          contentWidget: [
+            SizedBox(width: MediaQuery.of(context).size.width),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 4.0),
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: "Full Name",
+                ),
+                controller: contFullName,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 4.0),
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: "Email",
+                ),
+                controller: contEmail,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 4.0),
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: "Phone Number",
+                ),
+                controller: contPhoneNumber,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 4.0),
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: "Password",
+                ),
+                obscureText: true,
+                controller: contPassword,
+              ),
+            ),
+          ],
+          footerWidget: [
+            ButtonDialog(
+              label: 'Dismiss',
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            ButtonDialog(
+              label: 'Add Admin',
+              fontColor: Theme.of(context).buttonColor,
+              onPressed: () async {
+                if (!contEmail.text.contains('@')) {
+                  Fluttertoast.showToast(
+                      msg: 'Please enter correct email format');
+                  print('SHANGRI-LA ERROR: email format incorrect');
+                  return false;
+                }
+
+                Map<String, dynamic> dataMap = {
+                  DatabaseHelper.user_full_name: contFullName.text,
+                  DatabaseHelper.user_email: contEmail.text,
+                  DatabaseHelper.user_phone_number: contPhoneNumber.text,
+                  DatabaseHelper.password: contPassword.text,
+                  DatabaseHelper.user_type: 'admin',
+                };
+
+                print('///////////////dataMap//////////////');
+                dataMap.forEach((key, value) {
+                  print('$key => $value');
+                });
+                print('////////////////dataMap/////////////');
+
+                final id = await dbHelper.insert(
+                  DatabaseHelper.tb_user,
+                  dataMap,
+                );
+                print('Inserted row id to tb_vehicle $id successful');
+
+                Fluttertoast.showToast(
+                    msg: 'Add admin ${contEmail.text} successful!');
                 Navigator.pushNamedAndRemoveUntil(
                   context,
                   '/',

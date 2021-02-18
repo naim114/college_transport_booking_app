@@ -118,7 +118,7 @@ class ProfilePage extends StatelessWidget {
                       style: TextStyle(fontSize: 20),
                     ),
                   )
-                : SizedBox(),
+                : SizedBox.shrink(),
             user.user_type == 'student'
                 ? ListTile(
                     leading: Icon(Icons.apartment_sharp),
@@ -134,7 +134,7 @@ class ProfilePage extends StatelessWidget {
                       style: TextStyle(fontSize: 20),
                     ),
                   )
-                : SizedBox(),
+                : SizedBox.shrink(),
             user.user_type == 'student'
                 ? ListTile(
                     leading: Icon(Icons.class__sharp),
@@ -151,7 +151,7 @@ class ProfilePage extends StatelessWidget {
                       style: TextStyle(fontSize: 20),
                     ),
                   )
-                : SizedBox(),
+                : SizedBox.shrink(),
             Padding(
               padding: const EdgeInsets.all(20),
               child: ButtonRoundedCorner(

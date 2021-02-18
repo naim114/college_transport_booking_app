@@ -91,6 +91,7 @@ class _LoginPageState extends State<LoginPage> {
                           Fluttertoast.showToast(
                               msg: 'Login failed. Email or Password wrong.');
                           print('SHANGRI-LA ERROR: $error');
+                          // ignore: return_of_invalid_type_from_catch_error
                           return false;
                         }).then(
                           (value) async {

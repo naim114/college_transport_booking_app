@@ -16,6 +16,8 @@ class Submission {
   final int submission_student_id;
   final int submission_admin_id;
   final int submission_driver_id;
+  final int pending_for_head_driver;
+  final String reason;
   User admin;
   User driver;
   User student;
@@ -36,6 +38,8 @@ class Submission {
     this.submission_student_id,
     this.submission_admin_id,
     this.submission_driver_id,
+    this.pending_for_head_driver,
+    this.reason,
     this.admin,
     this.driver,
     this.student,
@@ -71,6 +75,8 @@ class Submission {
     int submission_student_id,
     int submission_admin_id,
     int submission_driver_id,
+    int pending_for_head_driver,
+    String reason,
     User admin,
     User driver,
     User student,
@@ -93,6 +99,9 @@ class Submission {
           submission_student_id ?? this.submission_student_id,
       submission_admin_id: submission_admin_id ?? this.submission_admin_id,
       submission_driver_id: submission_driver_id ?? this.submission_driver_id,
+      pending_for_head_driver:
+          pending_for_head_driver ?? this.pending_for_head_driver,
+      reason: reason ?? this.reason,
       admin: admin ?? this.admin,
       driver: driver ?? this.driver,
       student: student ?? this.student,
@@ -114,6 +123,8 @@ class Submission {
       'submission_student_id': submission_student_id,
       'submission_admin_id': submission_admin_id,
       'submission_driver_id': submission_driver_id,
+      'pending_for_head_driver': pending_for_head_driver,
+      'reason': reason,
       'admin': admin?.toMap(),
       'driver': driver?.toMap(),
       'student': student?.toMap(),
@@ -138,6 +149,8 @@ class Submission {
       submission_student_id: map['submission_student_id'],
       submission_admin_id: map['submission_admin_id'],
       submission_driver_id: map['submission_driver_id'],
+      pending_for_head_driver: map['pending_for_head_driver'],
+      reason: map['reason'],
       admin: User.fromMap(map['admin']),
       driver: User.fromMap(map['driver']),
       student: User.fromMap(map['student']),
@@ -152,7 +165,7 @@ class Submission {
 
   @override
   String toString() {
-    return 'Submission(submission_id: $submission_id, submission_status: $submission_status, submission_location: $submission_location, companion_name: $companion_name, companion_phone_no: $companion_phone_no, companion_email: $companion_email, date_time_departure_to_location: $date_time_departure_to_location, date_time_departure_from_location: $date_time_departure_from_location, submission_delete_flag: $submission_delete_flag, submission_student_id: $submission_student_id, submission_admin_id: $submission_admin_id, submission_driver_id: $submission_driver_id, admin: $admin, driver: $driver, student: $student, vehicle: $vehicle)';
+    return 'Submission(submission_id: $submission_id, submission_status: $submission_status, submission_location: $submission_location, companion_name: $companion_name, companion_phone_no: $companion_phone_no, companion_email: $companion_email, date_time_departure_to_location: $date_time_departure_to_location, date_time_departure_from_location: $date_time_departure_from_location, submission_delete_flag: $submission_delete_flag, submission_student_id: $submission_student_id, submission_admin_id: $submission_admin_id, submission_driver_id: $submission_driver_id, pending_for_head_driver: $pending_for_head_driver, reason: $reason, admin: $admin, driver: $driver, student: $student, vehicle: $vehicle)';
   }
 
   @override
@@ -173,6 +186,8 @@ class Submission {
         o.submission_student_id == submission_student_id &&
         o.submission_admin_id == submission_admin_id &&
         o.submission_driver_id == submission_driver_id &&
+        o.pending_for_head_driver == pending_for_head_driver &&
+        o.reason == reason &&
         o.admin == admin &&
         o.driver == driver &&
         o.student == student &&
@@ -193,6 +208,8 @@ class Submission {
         submission_student_id.hashCode ^
         submission_admin_id.hashCode ^
         submission_driver_id.hashCode ^
+        pending_for_head_driver.hashCode ^
+        reason.hashCode ^
         admin.hashCode ^
         driver.hashCode ^
         student.hashCode ^

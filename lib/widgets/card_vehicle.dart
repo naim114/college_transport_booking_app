@@ -119,7 +119,7 @@ class _CardVehicleState extends State<CardVehicle> {
                       showDialogManageVehicleInfo();
                     },
                   )
-                : SizedBox(),
+                : SizedBox.shrink(),
           ],
         );
       },

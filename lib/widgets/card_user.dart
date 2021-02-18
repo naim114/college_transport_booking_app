@@ -105,25 +105,25 @@ class _CardUserState extends State<CardUser> {
                     title: 'Head Driver',
                     text: widget.user.head_driver == 1 ? 'Yes' : 'No',
                   )
-                : SizedBox(),
+                : SizedBox.shrink(),
             widget.user.user_type == 'student'
                 ? TitleAndText(
                     title: 'Student ID',
                     text: widget.user.student_id,
                   )
-                : SizedBox(),
+                : SizedBox.shrink(),
             widget.user.user_type == 'student'
                 ? TitleAndText(
                     title: 'Class',
                     text: widget.user.student_class,
                   )
-                : SizedBox(),
+                : SizedBox.shrink(),
             widget.user.user_type == 'student'
                 ? TitleAndText(
                     title: 'Semester',
                     text: widget.user.student_semester.toString(),
                   )
-                : SizedBox(),
+                : SizedBox.shrink(),
           ],
           footerWidget: [
             ButtonDialog(
@@ -142,7 +142,7 @@ class _CardUserState extends State<CardUser> {
                       showDialogMakeHeadDriver();
                     },
                   )
-                : SizedBox(),
+                : SizedBox.shrink(),
             widget.user.user_type == 'driver' &&
                     widget.user.head_driver == 1 &&
                     widget.currentUser.user_type == 'admin'
@@ -153,7 +153,7 @@ class _CardUserState extends State<CardUser> {
                       showDialogDemote();
                     },
                   )
-                : SizedBox(),
+                : SizedBox.shrink(),
           ],
         );
       },

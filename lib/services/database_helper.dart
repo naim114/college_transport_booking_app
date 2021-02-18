@@ -7,6 +7,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:intl/intl.dart';
 
 class DatabaseHelper {
   static final _databaseName = "db_college_transportation_booking.db";
@@ -29,6 +30,8 @@ class DatabaseHelper {
   static final student_id = 'student_id';
 
   static final head_driver = 'head_driver';
+
+  static final super_admin = 'super_admin';
 
   //tb_vehicle
   static final tb_vehicle = 'tb_vehicle';
@@ -58,6 +61,7 @@ class DatabaseHelper {
   static final submission_admin_id = 'submission_admin_id';
   static final person_num = 'person_num';
   static final reason = 'reason';
+  static final pending_for_head_driver = 'pending_for_head_driver';
 
   Map<String, dynamic> defaultStudent = {
     DatabaseHelper.user_type: 'student',
@@ -103,13 +107,26 @@ class DatabaseHelper {
     DatabaseHelper.student_semester: 0,
   };
 
-  Map<String, dynamic> defaultAdmin = {
+  Map<String, dynamic> defaultSuperAdmin = {
     DatabaseHelper.user_type: 'admin',
     DatabaseHelper.student_id: 'none',
     DatabaseHelper.user_full_name: 'none',
     DatabaseHelper.user_email: 'admin',
     DatabaseHelper.student_class: 'none',
     DatabaseHelper.password: 'admin',
+    DatabaseHelper.user_phone_number: 0,
+    DatabaseHelper.student_semester: 0,
+    DatabaseHelper.super_admin: 1,
+    DatabaseHelper.user_session: 1,
+  };
+
+  Map<String, dynamic> defaultAdmin2 = {
+    DatabaseHelper.user_type: 'admin',
+    DatabaseHelper.student_id: 'none',
+    DatabaseHelper.user_full_name: 'none',
+    DatabaseHelper.user_email: 'admin2',
+    DatabaseHelper.student_class: 'none',
+    DatabaseHelper.password: 'admin2',
     DatabaseHelper.user_phone_number: 0,
     DatabaseHelper.student_semester: 0,
   };
@@ -130,6 +147,32 @@ class DatabaseHelper {
     DatabaseHelper.passenger_no: 6,
     DatabaseHelper.vehicle_type: 'van',
     DatabaseHelper.plat_no: 'VAN1113',
+  };
+
+  Map<String, dynamic> submission1 = {
+    DatabaseHelper.submission_location: 'sub1',
+    DatabaseHelper.person_num: 101,
+    DatabaseHelper.companion_name: 'sub1',
+    DatabaseHelper.companion_phone_no: 'sub1',
+    DatabaseHelper.companion_email: 'sub1',
+    DatabaseHelper.submission_student_id: 4,
+    DatabaseHelper.date_time_departure_to_location:
+        DateFormat('dd/MM/yyyy – kk:mm').format(DateTime.now()).toString(),
+    DatabaseHelper.date_time_departure_from_location:
+        DateFormat('dd/MM/yyyy – kk:mm').format(DateTime.now()).toString(),
+  };
+
+  Map<String, dynamic> submission2 = {
+    DatabaseHelper.submission_location: 'sub2',
+    DatabaseHelper.person_num: 101,
+    DatabaseHelper.companion_name: 'sub2',
+    DatabaseHelper.companion_phone_no: 'sub2',
+    DatabaseHelper.companion_email: 'sub2',
+    DatabaseHelper.submission_student_id: 4,
+    DatabaseHelper.date_time_departure_to_location:
+        DateFormat('dd/MM/yyyy – kk:mm').format(DateTime.now()).toString(),
+    DatabaseHelper.date_time_departure_from_location:
+        DateFormat('dd/MM/yyyy – kk:mm').format(DateTime.now()).toString(),
   };
 
   // make this a singleton class
@@ -172,6 +215,7 @@ class DatabaseHelper {
         "$user_email TEXT NOT NULL,"
         "$user_delete_flag INTEGER DEFAULT 0,"
         "$head_driver INTEGER DEFAULT 0,"
+        "$super_admin INTEGER DEFAULT 0,"
         "$student_semester INTEGER DEFAULT 0,"
         "$student_id TEXT DEFAULT 0,"
         "$student_class TEXT DEFAULT 0,"
@@ -195,6 +239,7 @@ class DatabaseHelper {
         "$date_time_departure_to_location TEXT NOT NULL,"
         "$date_time_departure_from_location TEXT NOT NULL,"
         "$submission_delete_flag INTEGER DEFAULT 0,"
+        "$pending_for_head_driver INTEGER DEFAULT 0,"
         "$person_num INTEGER NOT NULL,"
         //student
         "$submission_student_id INTEGER,"
@@ -210,15 +255,18 @@ class DatabaseHelper {
         // "FOREIGN KEY ($plat_no) REFERENCES tb_vehicle ($plat_no)"
         ")");
     await db.insert(DatabaseHelper.tb_user, defaultStudent);
-    await db.insert(DatabaseHelper.tb_user, defaultAdmin);
+    await db.insert(DatabaseHelper.tb_user, defaultSuperAdmin);
+    await db.insert(DatabaseHelper.tb_user, defaultAdmin2);
     await db.insert(DatabaseHelper.tb_user, defaultStudent2);
     await db.insert(DatabaseHelper.tb_user, defaultDriver);
     await db.insert(DatabaseHelper.tb_user, defaultDriver2);
     await db.insert(DatabaseHelper.tb_vehicle, bus1);
     await db.insert(DatabaseHelper.tb_vehicle, bus2);
     await db.insert(DatabaseHelper.tb_vehicle, van1);
+    await db.insert(DatabaseHelper.tb_submission, submission1);
+    await db.insert(DatabaseHelper.tb_submission, submission2);
 
-    print('////////////ALL TABLES CREATION SUCCESSFUL/////////////////');
+    print('****************ALL TABLES CREATION SUCCESSFUL*****************');
   }
 
   // Helper methods
@@ -305,6 +353,11 @@ class DatabaseHelper {
     return await db.delete(tableName, where: '$columnId = ?', whereArgs: [id]);
   }
 
+  // Future<int> deleteAllVehicle() async {
+  //   Database db = await instance.database;
+  //   return await db.delete(tableName, where: '$columnId = ?', whereArgs: [id]);
+  // }
+
   Future<User> getLogin(String enteredEmail, String enteredPassword) async {
     Database db = await instance.database;
 
@@ -358,13 +411,26 @@ class DatabaseHelper {
     Database db = await instance.database;
 
     var res = await db
-        .rawQuery("SELECT * FROM $tb_user WHERE user_email = '$inputEmail'");
+        .rawQuery("SELECT * FROM $tb_user WHERE $user_email = '$inputEmail'");
 
     if (res.length < 0) {
       return null;
     }
 
     return User.fromMap(res.first);
+  }
+
+  Future<Vehicle> getVehicleByPlatNo(String platNo) async {
+    Database db = await instance.database;
+
+    var res = await db
+        .rawQuery("SELECT * FROM $tb_vehicle WHERE $plat_no = '$platNo'");
+
+    if (res.length < 0) {
+      return null;
+    }
+
+    return Vehicle.fromMap(res.first);
   }
 
   Future<User> getUserById(int userId) async {
@@ -407,6 +473,38 @@ class DatabaseHelper {
     return submission;
   }
 
+  Future<List<Submission>> getAllSubmission({
+    String submissionStatus = 'Pending',
+  }) async {
+    Database db = await instance.database;
+
+    print('entering getAllSubmission()');
+    var res = await db.rawQuery(
+        "SELECT * FROM $tb_submission WHERE $submission_status = '$submissionStatus'");
+
+    // print('inserted data: ${studentId.toString()} & $submission_status');
+    print('xx data: $res');
+
+    // res.forEach((map) {
+    //   map.forEach((key, value) {
+    //     print('xx $key ==> ${value.runtimeType} ==> $value');
+    //   });
+    // });
+
+    if (res.length < 0) {
+      print('couldnt find the submission dumbass');
+      return null;
+    }
+
+    List<Submission> submission = [];
+    res.forEach((sub) {
+      submission.add(Submission.fromMap(sub));
+    });
+
+    print('data submission: $submission');
+    return submission;
+  }
+
   Future<List<Submission>> getAllSubmissionByStatus(
       {String subStatus = 'Pending'}) async {
     Database db = await instance.database;
@@ -446,6 +544,47 @@ class DatabaseHelper {
 
     print('data submission getAllSubmissionByStatus(): $userList');
     return userList;
+  }
+
+  Future<List<List<dynamic>>> getAllDriversAndVehicle() async {
+    Database db = await instance.database;
+
+    var driverRes =
+        await db.rawQuery("SELECT * FROM $tb_user WHERE $user_type = 'driver'");
+
+    if (driverRes.length < 0) {
+      print('couldnt find the drivers dumbass');
+      return null;
+    }
+
+    List<User> driverList = [];
+    driverRes.forEach((user) {
+      driverList.add(User.fromMap(user));
+    });
+
+    print('getting all driver: $driverList');
+
+    var vehicleRes = await db.rawQuery("SELECT * FROM $tb_vehicle");
+
+    if (vehicleRes.length < 0) {
+      print('couldnt find the vehicles dumbass');
+      return null;
+    }
+
+    List<Vehicle> vehicleList = [];
+    vehicleRes.forEach((vehicle) {
+      vehicleList.add(Vehicle.fromMap(vehicle));
+    });
+
+    print('getting all vehicle: $vehicleList');
+
+    List<List<dynamic>> driversVehicleList = [];
+    driversVehicleList.add(driverList);
+    driversVehicleList.add(vehicleList);
+
+    print('getting all lists: $driversVehicleList');
+
+    return driversVehicleList;
   }
 
   Future<List<Vehicle>> getAllVehicle() async {

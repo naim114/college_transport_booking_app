@@ -13,6 +13,7 @@ class User {
   final String student_id;
   final String student_class;
   final int user_session;
+  final int super_admin;
 
   User({
     this.user_id,
@@ -27,6 +28,7 @@ class User {
     this.student_id,
     this.student_class,
     this.user_session,
+    this.super_admin,
   });
 
   User copyWith({
@@ -42,6 +44,7 @@ class User {
     String student_id,
     String student_class,
     int user_session,
+    int super_admin,
   }) {
     return User(
       user_id: user_id ?? this.user_id,
@@ -53,9 +56,10 @@ class User {
       user_delete_flag: user_delete_flag ?? this.user_delete_flag,
       head_driver: head_driver ?? this.head_driver,
       student_semester: student_semester ?? this.student_semester,
-      user_session: user_session ?? this.user_session,
       student_id: student_id ?? this.student_id,
       student_class: student_class ?? this.student_class,
+      user_session: user_session ?? this.user_session,
+      super_admin: super_admin ?? this.super_admin,
     );
   }
 
@@ -70,9 +74,10 @@ class User {
       'user_delete_flag': user_delete_flag,
       'head_driver': head_driver,
       'student_semester': student_semester,
-      'user_session': user_session,
       'student_id': student_id,
       'student_class': student_class,
+      'user_session': user_session,
+      'super_admin': super_admin,
     };
   }
 
@@ -89,9 +94,10 @@ class User {
       user_delete_flag: map['user_delete_flag'],
       head_driver: map['head_driver'],
       student_semester: map['student_semester'],
-      user_session: map['user_session'],
       student_id: map['student_id'],
       student_class: map['student_class'],
+      user_session: map['user_session'],
+      super_admin: map['super_admin'],
     );
   }
 
@@ -101,7 +107,7 @@ class User {
 
   @override
   String toString() {
-    return 'User(user_id: $user_id, user_full_name: $user_full_name, password: $password, user_type: $user_type, user_phone_number: $user_phone_number, user_email: $user_email, user_delete_flag: $user_delete_flag, head_driver: $head_driver, student_semester: $student_semester, user_session: $user_session, student_id: $student_id, student_class: $student_class)';
+    return 'User(user_id: $user_id, user_full_name: $user_full_name, password: $password, user_type: $user_type, user_phone_number: $user_phone_number, user_email: $user_email, user_delete_flag: $user_delete_flag, head_driver: $head_driver, student_semester: $student_semester, student_id: $student_id, student_class: $student_class, user_session: $user_session, super_admin: $super_admin)';
   }
 
   @override
@@ -118,9 +124,10 @@ class User {
         o.user_delete_flag == user_delete_flag &&
         o.head_driver == head_driver &&
         o.student_semester == student_semester &&
-        o.user_session == user_session &&
         o.student_id == student_id &&
-        o.student_class == student_class;
+        o.student_class == student_class &&
+        o.user_session == user_session &&
+        o.super_admin == super_admin;
   }
 
   @override
@@ -134,8 +141,9 @@ class User {
         user_delete_flag.hashCode ^
         head_driver.hashCode ^
         student_semester.hashCode ^
-        user_session.hashCode ^
         student_id.hashCode ^
-        student_class.hashCode;
+        student_class.hashCode ^
+        user_session.hashCode ^
+        super_admin.hashCode;
   }
 }
