@@ -40,19 +40,18 @@ class Settings extends StatelessWidget {
               dbHelper.printAllData();
             },
           ),
-          //   IconButton(
-          //     icon: Icon(
-          //       Icons.help,
-          //       color: Colors.blue,
-          //     ),
-          //     onPressed: () async {
-          //       print('current user id ${user.user_id}');
-          //       List<Submission> newSub = await dbHelper.getSubmissionByStudentId(
-          //         studentId: user.user_id,
-          //       );
-          //       print('newSub: ${newSub.toString()}');
-          //     },
-          //   ),
+          IconButton(
+            icon: Icon(
+              Icons.remove_circle_outline,
+              color: Colors.red,
+            ),
+            onPressed: () async {
+              print('current user id ${user.user_id}');
+              List<Submission> newSub = await dbHelper.getAllSubmission(
+                  submissionStatus: 'Confirmed');
+              print('getAllSubmission: ${newSub.toString()}');
+            },
+          ),
         ],
       ),
       body: Container(
@@ -100,26 +99,26 @@ class Settings extends StatelessWidget {
                       },
                     ),
                   ),
-                  user.user_type == 'admin'
-                      ? Tooltip(
-                          message: 'Manage Booking',
-                          child: ButtonIconRoundedCorner(
-                            icon: Icon(
-                              Icons.list_alt,
-                              color: Colors.white,
-                            ),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (BuildContext context) =>
-                                      ManageBooking(user: user),
-                                ),
-                              );
-                            },
-                          ),
-                        )
-                      : SizedBox(),
+                  // user.user_type == 'admin'
+                  //     ? Tooltip(
+                  //         message: 'Manage Booking',
+                  //         child: ButtonIconRoundedCorner(
+                  //           icon: Icon(
+                  //             Icons.list_alt,
+                  //             color: Colors.white,
+                  //           ),
+                  //           onTap: () {
+                  //             Navigator.push(
+                  //               context,
+                  //               MaterialPageRoute(
+                  //                 builder: (BuildContext context) =>
+                  //                     ManageBooking(user: user),
+                  //               ),
+                  //             );
+                  //           },
+                  //         ),
+                  //       )
+                  //     : SizedBox.shrink(),
                   user.user_type == 'admin' || user.head_driver == 1
                       ? Tooltip(
                           message: 'Manage Users & Vehicle',
@@ -141,7 +140,7 @@ class Settings extends StatelessWidget {
                             },
                           ),
                         )
-                      : SizedBox(),
+                      : SizedBox.shrink(),
                   Tooltip(
                     message: 'Log Out',
                     child: ButtonIconRoundedCorner(

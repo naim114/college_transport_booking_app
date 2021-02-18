@@ -101,7 +101,7 @@ class _EditProfileState extends State<EditProfile> {
                     controller: contStudentID,
                   ),
                 )
-              : SizedBox(),
+              : SizedBox.shrink(),
           widget.user.user_type == 'student'
               ? Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -113,7 +113,7 @@ class _EditProfileState extends State<EditProfile> {
                     controller: contClass,
                   ),
                 )
-              : SizedBox(),
+              : SizedBox.shrink(),
           widget.user.user_type == 'student'
               ? Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -128,7 +128,7 @@ class _EditProfileState extends State<EditProfile> {
                     controller: contSemester,
                   ),
                 )
-              : SizedBox(),
+              : SizedBox.shrink(),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 30),
             child: ButtonRoundedCorner(
