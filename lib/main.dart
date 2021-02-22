@@ -3,6 +3,12 @@ import 'package:college_transport_booking_app/pages/register_student.dart';
 import 'package:college_transport_booking_app/session_wrapper.dart';
 import 'package:flutter/material.dart';
 
+// TODO try fix the ConcurrentModificationError, problem occurs when add list before build complete, look up build finish callback (?), try not to setstate inside inistate
+
+// TODO reschedule trip
+// TODO when assigning driver & vehicle if the driver & vehicle is unavailable on that date return false
+// TODO when assigning vehicle if the submission passenger number exceed selected vehicle passenger capacity return false
+
 void main() {
   runApp(MyApp());
 }

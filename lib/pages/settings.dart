@@ -124,7 +124,7 @@ class Settings extends StatelessWidget {
                           message: 'Manage Users & Vehicle',
                           child: ButtonIconRoundedCorner(
                             icon: Icon(
-                              Icons.people_rounded,
+                              Icons.people_alt_rounded,
                               color: Colors.white,
                             ),
                             onTap: () {

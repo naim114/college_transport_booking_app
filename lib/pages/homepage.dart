@@ -1,4 +1,5 @@
 import 'package:college_transport_booking_app/models/model_user.dart';
+import 'package:college_transport_booking_app/pages/calender_booking.dart';
 import 'package:college_transport_booking_app/services/database_helper.dart';
 import 'package:college_transport_booking_app/widgets/button_dialog.dart';
 import 'package:college_transport_booking_app/widgets/dialog_custom.dart';
@@ -20,10 +21,6 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
-  Map<DateTime, List> _events;
-  List _selectedEvents;
-  AnimationController _animationController;
-  CalendarController _calendarController;
   final dbHelper = DatabaseHelper.instance;
 
   final contSubmissionLocation = TextEditingController();
@@ -32,43 +29,12 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
   final contCompanionPhoneNumber = TextEditingController();
   final contCompanionEmail = TextEditingController();
   DateTime _selectedDateCollegeToLocation = DateTime.now();
+  DateTime _selectedTimeCollegeToLocation = DateTime.now();
   DateTime _selectedDateLocationToCollege = DateTime.now();
-  // final date_time_departure_to_location = TextEditingController();
-  // final date_time_departure_from_location = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    final _selectedDay = DateTime.now();
-
-    _events = {
-      // _selectedDay.add(Duration(days: 22)): [
-      //   'Event A13',
-      //   'Event B13',
-      // ],
-      // _selectedDay.add(Duration(days: 26)): [
-      //   'Event A14',
-      //   'Event B14',
-      //   'Event C14'
-      // ],
-      DateTime(2021, 2, 13): ['summer depression, its summer here everyday'],
-    };
-
-    _selectedEvents = _events[_selectedDay] ?? [];
-    _calendarController = CalendarController();
-
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
-
-    _animationController.forward();
-  }
+  DateTime _selectedTimeLocationToCollege = DateTime.now();
 
   @override
   void dispose() {
-    _animationController.dispose();
-    _calendarController.dispose();
     contSubmissionLocation.dispose();
     contPersonNum.dispose();
     contCompanionName.dispose();
@@ -80,7 +46,8 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final User user = Provider.of<User>(context);
-    print('current user: $user');
+    // print('current user: $user');
+    // print('xx current user: $currentUser');
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
@@ -100,94 +67,22 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Theme.of(context).buttonColor,
-        tooltip: 'Create and trip submission',
-        child: Icon(
-          Icons.add_to_photos,
-          color: Colors.white,
-        ),
-        onPressed: () {
-          showDialogCreateSubmission(user);
-        },
-      ),
-      body: Column(
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Text(
-              'View all your confirmed trip here. You can create and trip submission by tapping on the floating button.',
-              style: TextStyle(
-                fontFamily: 'GothicA1Bold',
-                fontSize: 15,
+      floatingActionButton: user.user_type == 'student'
+          ? FloatingActionButton(
+              backgroundColor: Colors.indigo[900],
+              tooltip: 'Create and trip submission',
+              child: Icon(
+                Icons.add_to_photos,
+                color: Colors.white,
               ),
-            ),
-          ),
-          _buildTableCalendar(),
-          SizedBox(height: 8.0),
-          Expanded(child: _buildEventList()),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTableCalendar() {
-    return TableCalendar(
-      calendarController: _calendarController,
-      events: _events,
-      initialCalendarFormat: CalendarFormat.month,
-      formatAnimation: FormatAnimation.slide,
-      startingDayOfWeek: StartingDayOfWeek.monday,
-      availableGestures: AvailableGestures.all,
-      availableCalendarFormats: const {
-        CalendarFormat.month: '',
-        CalendarFormat.week: '',
-      },
-      calendarStyle: CalendarStyle(
-        outsideDaysVisible: false,
-        weekendStyle: TextStyle().copyWith(color: Colors.blue[800]),
-        holidayStyle: TextStyle().copyWith(color: Colors.blue[800]),
-      ),
-      daysOfWeekStyle: DaysOfWeekStyle(
-        weekendStyle: TextStyle().copyWith(color: Colors.blue[600]),
-      ),
-      headerStyle: HeaderStyle(
-        centerHeaderTitle: true,
-        formatButtonVisible: false,
-      ),
-      onDaySelected: _onDaySelected,
-      // onVisibleDaysChanged: _onVisibleDaysChanged,
-      // onCalendarCreated: _onCalendarCreated,
-    );
-  }
-
-  void _onDaySelected(DateTime day, List events, List holidays) {
-    print('CALLBACK: _onDaySelected');
-    setState(() {
-      _selectedEvents = events;
-    });
-  }
-
-  Widget _buildEventList() {
-    return ListView(
-      children: _selectedEvents
-          .map(
-            (event) => Container(
-              decoration: BoxDecoration(
-                border: Border.all(width: 0.8),
-                borderRadius: BorderRadius.circular(12.0),
-              ),
-              margin:
-                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-              child: ListTile(
-                title: Text(event.toString()),
-                onTap: () => print('$event tapped!'),
-              ),
-            ),
-          )
-          .toList(),
+              onPressed: () {
+                showDialogCreateSubmission(user);
+              },
+            )
+          : SizedBox.shrink(),
+      body: user.user_id != 0
+          ? CalenderBooking(user: user)
+          : Center(child: CupertinoActivityIndicator()),
     );
   }
 
@@ -195,9 +90,9 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        // String formattedDateCollegeToLocation = DateFormat('dd/MM/yyyy – kk:mm')
+        // String formattedDateCollegeToLocation = DateFormat('yyyy-MM-dd')
         //     .format(_selectedDateCollegeToLocation);
-        // String formattedDateLocationToCollege = DateFormat('dd/MM/yyyy – kk:mm')
+        // String formattedDateLocationToCollege = DateFormat('yyyy-MM-dd')
         //     .format(_selectedDateLocationToCollege);
 
         return DialogCustom(
@@ -305,12 +200,23 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
   ) async {
     final DateTime picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2015),
+      initialDate: DateTime.now().add(Duration(days: 7)),
+      firstDate: DateTime.now().add(Duration(days: 7)),
       lastDate: DateTime(2101),
       helpText: 'Departure From College to Location',
       confirmText: 'Continue'.toUpperCase(),
       fieldLabelText: 'Departure From College to Location',
+      builder: (BuildContext context, Widget child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: Colors.pinkAccent,
+            accentColor: Colors.pinkAccent,
+            colorScheme: ColorScheme.light(primary: Colors.pinkAccent),
+            buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
+          ),
+          child: child,
+        );
+      },
     );
     if (picked != null && picked != _selectedDateCollegeToLocation) {
       setState(() {
@@ -318,13 +224,51 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
           picked.year,
           picked.month,
           picked.day,
+        );
+      });
+      // _selectDateLocationToCollege(context, user);
+    }
+    print('_selectedDateCollegeToLocation: $_selectedDateCollegeToLocation');
+    _selectTimeCollegeToLocation(context, user);
+  }
+
+  Future<void> _selectTimeCollegeToLocation(
+    BuildContext context,
+    User user,
+  ) async {
+    final TimeOfDay picked = await showTimePicker(
+      context: context,
+      helpText: 'Departure From College to Location',
+      confirmText: 'Continue'.toUpperCase(),
+      builder: (BuildContext context, Widget child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: Colors.pinkAccent,
+            accentColor: Colors.pinkAccent,
+            colorScheme: ColorScheme.light(primary: Colors.pinkAccent),
+            buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
+          ),
+          child: child,
+        );
+      },
+      initialTime: TimeOfDay(
+          hour: _selectedTimeCollegeToLocation.hour,
+          minute: _selectedTimeCollegeToLocation.minute),
+    );
+    if (picked != null &&
+        picked !=
+            TimeOfDay(
+                hour: _selectedTimeCollegeToLocation.hour,
+                minute: _selectedTimeCollegeToLocation.minute)) {
+      setState(() {
+        _selectedTimeCollegeToLocation = DateTime(
           picked.hour,
           picked.minute,
         );
       });
-      print('_selectedDateCollegeToLocation: $_selectedDateCollegeToLocation');
-      _selectDateLocationToCollege(context, user);
     }
+    print('_selectedTimeCollegeToLocation: $_selectedTimeCollegeToLocation');
+    _selectDateLocationToCollege(context, user);
   }
 
   Future<void> _selectDateLocationToCollege(
@@ -333,8 +277,8 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
   ) async {
     final DateTime picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2015),
+      initialDate: DateTime.now().add(Duration(days: 7)),
+      firstDate: DateTime.now().add(Duration(days: 7)),
       lastDate: DateTime(2101),
       helpText: 'Departure From Location to College',
       confirmText: 'Submit Trip Form'.toUpperCase(),
@@ -345,39 +289,91 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
           picked.year,
           picked.month,
           picked.day,
+        );
+      });
+    }
+    print('_selectDateLocationToCollege: $_selectedDateLocationToCollege');
+    _selectTimeLocationToCollege(context, user);
+  }
+
+  Future<void> _selectTimeLocationToCollege(
+    BuildContext context,
+    User user,
+  ) async {
+    final TimeOfDay picked = await showTimePicker(
+      context: context,
+      helpText: 'Departure From Location to College',
+      confirmText: 'Continue'.toUpperCase(),
+      initialTime: TimeOfDay(
+          hour: _selectedTimeLocationToCollege.hour,
+          minute: _selectedTimeLocationToCollege.minute),
+    );
+    if (picked != null &&
+        picked !=
+            TimeOfDay(
+                hour: _selectedTimeLocationToCollege.hour,
+                minute: _selectedTimeLocationToCollege.minute)) {
+      setState(() {
+        _selectedTimeLocationToCollege = DateTime(
           picked.hour,
           picked.minute,
         );
       });
-      print('_selectedDateCollegeToLocation: $_selectedDateLocationToCollege');
-
-      Map<String, dynamic> dataRow = {
-        // DatabaseHelper.user_type: 'student',
-        DatabaseHelper.submission_location: contSubmissionLocation.text,
-        DatabaseHelper.person_num: contPersonNum.text,
-        DatabaseHelper.companion_name: contCompanionName.text,
-        DatabaseHelper.companion_phone_no: contCompanionPhoneNumber.text,
-        DatabaseHelper.companion_email: contCompanionEmail.text,
-        DatabaseHelper.submission_student_id: user.user_id,
-        DatabaseHelper.date_time_departure_to_location:
-            DateFormat('dd/MM/yyyy – kk:mm')
-                .format(_selectedDateCollegeToLocation)
-                .toString(),
-        DatabaseHelper.date_time_departure_from_location:
-            DateFormat('dd/MM/yyyy – kk:mm')
-                .format(_selectedDateLocationToCollege)
-                .toString(),
-      };
-      print('/////////data row/////////');
-      dataRow.forEach((key, value) {
-        print('$key: $value');
-      });
-      print('/////////data row/////////');
-      final id = await dbHelper.insert(DatabaseHelper.tb_submission, dataRow);
-      print('Inserted row id to tb_submission $id successful');
-      Fluttertoast.showToast(
-          msg: 'Trip form submission sucessfully submitted!');
-      Navigator.of(context).pop();
     }
+    print('_selectedTimeLocationToCollege: $_selectedTimeLocationToCollege');
+
+    DateTime selectedDateTimeGo = DateTime(
+      _selectedDateCollegeToLocation.year,
+      _selectedDateCollegeToLocation.month,
+      _selectedDateCollegeToLocation.day,
+      _selectedTimeCollegeToLocation.hour,
+      _selectedTimeCollegeToLocation.minute,
+    );
+
+    DateTime selectedDateTimeBack = DateTime(
+      _selectedDateLocationToCollege.year,
+      _selectedDateLocationToCollege.month,
+      _selectedDateLocationToCollege.day,
+      _selectedTimeLocationToCollege.hour,
+      _selectedTimeLocationToCollege.minute,
+    );
+
+    print('selectedDateTimeGo: $selectedDateTimeGo');
+    print('selectedDateTimeBack: $selectedDateTimeBack');
+
+    print(
+        'selectedDateTimeGo reformat: ${DateFormat('yyyy-MM-dd HH:mm').format(selectedDateTimeGo)}');
+    print(
+        'selectedDateTimeBack reformat: ${DateFormat('yyyy-MM-dd HH:mm').format(selectedDateTimeBack)}');
+
+    Map<String, dynamic> dataRow = {
+      // DatabaseHelper.user_type: 'student',
+      DatabaseHelper.submission_location: contSubmissionLocation.text,
+      DatabaseHelper.person_num: contPersonNum.text,
+      DatabaseHelper.companion_name: contCompanionName.text,
+      DatabaseHelper.companion_phone_no: contCompanionPhoneNumber.text,
+      DatabaseHelper.companion_email: contCompanionEmail.text,
+      DatabaseHelper.submission_student_id: user.user_id,
+      DatabaseHelper.date_time_departure_to_location:
+          DateFormat('yyyy-MM-dd HH:mm').format(selectedDateTimeGo).toString(),
+      DatabaseHelper.date_time_departure_from_location:
+          DateFormat('yyyy-MM-dd HH:mm')
+              .format(selectedDateTimeBack)
+              .toString(),
+    };
+    print('/////////data row/////////');
+    dataRow.forEach((key, value) {
+      print('$key: $value');
+    });
+    print('/////////data row/////////');
+    final id = await dbHelper.insert(DatabaseHelper.tb_submission, dataRow);
+    print('Inserted row id to tb_submission $id successful');
+    Fluttertoast.showToast(msg: 'Trip form submission sucessfully submitted!');
+    // Navigator.of(context).pop();
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      '/',
+      ModalRoute.withName('/'),
+    );
   }
 }

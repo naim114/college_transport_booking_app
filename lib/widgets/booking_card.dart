@@ -10,15 +10,22 @@ import 'package:college_transport_booking_app/widgets/button_dialog.dart';
 import 'package:college_transport_booking_app/widgets/dialog_custom.dart';
 import 'package:college_transport_booking_app/widgets/title_and_text.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
 
 class BookingCard extends StatefulWidget {
   const BookingCard({
     Key key,
     @required this.submission,
     @required this.user,
+    this.cardColor = Colors.white,
+    this.textColor = Colors.black,
+    this.iconColor,
+    this.elevation = 2,
   }) : super(key: key);
   final Submission submission;
   final User user;
+  final Color cardColor, textColor, iconColor;
+  final double elevation;
   @override
   _BookingCardState createState() => _BookingCardState();
 }
@@ -26,8 +33,32 @@ class BookingCard extends StatefulWidget {
 String dropdownValueDriver = 'Choose Driver';
 String dropdownValueVehicle = 'Choose Vehicle';
 
+User defaultUser = User(
+  user_id: 0,
+  user_full_name: dropdownValueDriver,
+  password: dropdownValueDriver,
+  user_type: 'driver',
+  user_phone_number: dropdownValueDriver,
+  user_email: dropdownValueDriver,
+  user_delete_flag: 0,
+  head_driver: 0,
+  student_semester: 0,
+  student_id: dropdownValueDriver,
+  student_class: dropdownValueDriver,
+  user_session: 0,
+);
+
+Vehicle defaultVehicle = Vehicle(
+  vehicle_id: 0,
+  plat_no: dropdownValueVehicle,
+  passenger_no: 0,
+  vehicle_delete_flag: 0,
+  vehicle_type: 'van',
+);
+
 class _BookingCardState extends State<BookingCard> {
   final dbHelper = DatabaseHelper.instance;
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -37,7 +68,8 @@ class _BookingCardState extends State<BookingCard> {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 5.0),
         child: Card(
-          elevation: 2,
+          color: widget.cardColor,
+          elevation: widget.elevation,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
@@ -54,12 +86,13 @@ class _BookingCardState extends State<BookingCard> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     text: TextSpan(
-                      style: TextStyle(color: Colors.black),
+                      style: TextStyle(color: widget.textColor),
                       children: [
                         WidgetSpan(
                           child: Icon(
                             Icons.location_on,
-                            color: Theme.of(context).primaryColor,
+                            color: widget.iconColor ??
+                                Theme.of(context).primaryColor,
                             size: 18,
                           ),
                         ),
@@ -76,19 +109,21 @@ class _BookingCardState extends State<BookingCard> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     text: TextSpan(
-                      style: TextStyle(color: Colors.black),
+                      style: TextStyle(color: widget.textColor),
                       children: [
                         WidgetSpan(
                           child: Icon(
                             Icons.watch_later,
-                            color: Theme.of(context).primaryColor,
+                            color: widget.iconColor ??
+                                Theme.of(context).primaryColor,
                             size: 18,
                           ),
                         ),
                         WidgetSpan(child: SizedBox(width: 7)),
                         TextSpan(
-                          text: widget
-                              .submission.date_time_departure_to_location
+                          text: DateFormat('dd-MM-yyy kk:mm')
+                              .format(DateTime.parse(widget
+                                  .submission.date_time_departure_to_location))
                               .toString(),
                         ),
                       ],
@@ -108,6 +143,115 @@ class _BookingCardState extends State<BookingCard> {
       context: context,
       builder: (BuildContext context) {
         Submission submission = widget.submission;
+
+        List<Widget> footer = [];
+
+        //Confirm Trip Complete
+        if (submission.submission_status == 'Confirmed' &&
+            widget.user.user_type == 'driver') {
+          footer.add(ButtonDialog(
+            label: 'Confirm Trip Completion',
+            onPressed: () {
+              showDialogCompleteTrip();
+            },
+          ));
+        }
+
+        //Cancel Trip
+        if (submission.submission_status == 'Confirmed' &&
+            (widget.user.user_type == 'admin' ||
+                widget.user.head_driver == 1)) {
+          footer.add(
+            ButtonDialog(
+              label: 'Cancel Trip',
+              fontColor: Colors.red,
+              onPressed: () {
+                showDialogCancelTrip();
+              },
+            ),
+          );
+        }
+
+        //Approve & Disapprove/Deny Trip Submission
+        if (submission.submission_status == 'Pending' &&
+            widget.user.user_type == 'admin' &&
+            widget.submission.pending_for_head_driver == 0) {
+          footer.add(
+            ButtonDialog(
+              label: 'Deny Trip',
+              fontColor: Colors.red,
+              onPressed: () {
+                showDialogDisapproveTrip();
+              },
+            ),
+          );
+          footer.add(
+            ButtonDialog(
+              label: 'Approve Trip',
+              fontColor: Theme.of(context).buttonColor,
+              onPressed: () {
+                showDialogApproveTrip();
+              },
+            ),
+          );
+        }
+
+        //Assign Driver & Vehicle
+        if (submission.submission_status == 'Pending' &&
+            (widget.user.user_type == 'admin' ||
+                widget.user.head_driver == 1) &&
+            submission.pending_for_head_driver == 1) {
+          footer.add(
+            FutureBuilder<List<List<dynamic>>>(
+              future: dbHelper.getAllDriversAndVehicle(),
+              builder: (context, snapshot) {
+                // List<User> driverList = snapshot.data;
+                List<List<dynamic>> driversVehicleList = snapshot.data;
+
+                // driversVehicleList.forEach((list) {
+                //   print('${list.runtimeType} ---- $list');
+                // });
+
+                List<User> driverList = [];
+                List<Vehicle> vehicleList = [];
+                driversVehicleList.forEach((list) {
+                  if (list is List<User>) {
+                    driverList = list;
+                  } else {
+                    vehicleList = list;
+                  }
+                });
+
+                return snapshot.hasData
+                    ? ButtonDialog(
+                        label: 'Assign Driver & Vehicle',
+                        fontColor: Theme.of(context).buttonColor,
+                        onPressed: () {
+                          // print('list of driver: $driverList');
+                          // print('list of vehicle: $vehicleList');
+
+                          showDialogAssignDriverVehicle(
+                            driverList,
+                            vehicleList,
+                          );
+                        },
+                      )
+                    : CupertinoActivityIndicator();
+              },
+            ),
+          );
+        }
+
+        footer.add(
+          //Dismiss
+          ButtonDialog(
+            label: 'Dismiss',
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+        );
+
         return DialogCustom(
           dialogTitle: 'Trip Submission Info',
           contentWidget: [
@@ -118,7 +262,7 @@ class _BookingCardState extends State<BookingCard> {
             ),
             submission.submission_status == 'Cancelled'
                 ? TitleAndText(
-                    title: 'Reasons of Submission Denied',
+                    title: 'Reasons of Submission Denied/Trip Cancellation',
                     text: submission.reason,
                   )
                 : SizedBox.shrink(),
@@ -183,6 +327,10 @@ class _BookingCardState extends State<BookingCard> {
               text: submission.submission_location,
             ),
             TitleAndText(
+              title: 'Passenger Number',
+              text: submission.person_num.toString(),
+            ),
+            TitleAndText(
               title: 'Companion',
               text: submission.companion_name,
             ),
@@ -196,91 +344,127 @@ class _BookingCardState extends State<BookingCard> {
             ),
             TitleAndText(
               title: 'Departure From College to Location',
-              text: submission.date_time_departure_to_location,
+              text: DateFormat('dd-MM-yyy kk:mm')
+                  .format(DateTime.parse(
+                      submission.date_time_departure_to_location))
+                  .toString(),
             ),
             TitleAndText(
               title: 'Departure From Location to College',
-              text: submission.date_time_departure_from_location,
+              text: DateFormat('dd-MM-yyy kk:mm')
+                  .format(DateTime.parse(
+                      submission.date_time_departure_from_location))
+                  .toString(),
             ),
           ],
-          footerWidget: [
-            //Approve
-            submission.submission_status == 'Pending' &&
-                    widget.user.user_type == 'admin' &&
-                    widget.submission.pending_for_head_driver == 0
-                ? ButtonDialog(
-                    label: 'Approve Trip',
-                    fontColor: Theme.of(context).buttonColor,
-                    onPressed: () {
-                      showDialogApproveTrip();
-                    },
-                  )
-                : SizedBox.shrink(),
+          // footerWidget: [
+          //   //Approve
+          //   Visibility(
+          //     visible: submission.submission_status == 'Pending' &&
+          //         widget.user.user_type == 'admin' &&
+          //         widget.submission.pending_for_head_driver == 0,
+          //     child: ButtonDialog(
+          //       label: 'Approve Trip',
+          //       fontColor: Theme.of(context).buttonColor,
+          //       onPressed: () {
+          //         showDialogApproveTrip();
+          //       },
+          //     ),
+          //   ),
 
-            //Asign Drivers & Vehicle
-            submission.submission_status == 'Pending' &&
-                    (widget.user.user_type == 'admin' ||
-                        widget.user.head_driver == 1) &&
-                    submission.pending_for_head_driver == 1
-                ? FutureBuilder<List<List<dynamic>>>(
-                    future: dbHelper.getAllDriversAndVehicle(),
-                    builder: (context, snapshot) {
-                      // List<User> driverList = snapshot.data;
-                      List<List<dynamic>> driversVehicleList = snapshot.data;
+          //   //Asign Drivers & Vehicle
+          //   Visibility(
+          //     visible: submission.submission_status == 'Pending' &&
+          //         (widget.user.user_type == 'admin' ||
+          //             widget.user.head_driver == 1) &&
+          //         submission.pending_for_head_driver == 1,
+          //     child: FutureBuilder<List<List<dynamic>>>(
+          //       future: dbHelper.getAllDriversAndVehicle(),
+          //       builder: (context, snapshot) {
+          //         // List<User> driverList = snapshot.data;
+          //         List<List<dynamic>> driversVehicleList = snapshot.data;
 
-                      driversVehicleList.forEach((list) {
-                        print('${list.runtimeType} ---- $list');
-                      });
+          //         // driversVehicleList.forEach((list) {
+          //         //   print('${list.runtimeType} ---- $list');
+          //         // });
 
-                      List<User> driverList = [];
-                      List<Vehicle> vehicleList = [];
-                      driversVehicleList.forEach((list) {
-                        if (list is List<User>) {
-                          driverList = list;
-                        } else {
-                          vehicleList = list;
-                        }
-                      });
+          //         List<User> driverList = [];
+          //         List<Vehicle> vehicleList = [];
+          //         driversVehicleList.forEach((list) {
+          //           if (list is List<User>) {
+          //             driverList = list;
+          //           } else {
+          //             vehicleList = list;
+          //           }
+          //         });
 
-                      return snapshot.hasData
-                          ? ButtonDialog(
-                              label: 'Assign Driver & Vehicle',
-                              fontColor: Theme.of(context).buttonColor,
-                              onPressed: () {
-                                // print('list of driver: $driverList');
-                                // print('list of vehicle: $vehicleList');
+          //         return snapshot.hasData
+          //             ? ButtonDialog(
+          //                 label: 'Assign Driver & Vehicle',
+          //                 fontColor: Theme.of(context).buttonColor,
+          //                 onPressed: () {
+          //                   // print('list of driver: $driverList');
+          //                   // print('list of vehicle: $vehicleList');
 
-                                showDialogAssignDriverVehicle(
-                                  driverList,
-                                  vehicleList,
-                                ); //IF USER IS HEAD DRIVERS (ONLY HEAD DRIVER NOT EVEN ADMIN)
-                              },
-                            )
-                          : CupertinoActivityIndicator();
-                    },
-                  )
-                : SizedBox.shrink(),
+          //                   showDialogAssignDriverVehicle(
+          //                     driverList,
+          //                     vehicleList,
+          //                   ); //IF USER IS HEAD DRIVERS (ONLY HEAD DRIVER NOT EVEN ADMIN)
+          //                 },
+          //               )
+          //             : CupertinoActivityIndicator();
+          //       },
+          //     ),
+          //   ),
 
-            //Disapprove
-            submission.submission_status == 'Pending' &&
-                    widget.user.user_type == 'admin' &&
-                    widget.submission.pending_for_head_driver == 0
-                ? ButtonDialog(
-                    label: 'Deny Trip',
-                    fontColor: Colors.red,
-                    onPressed: () {
-                      showDialogApproveTrip();
-                    },
-                  )
-                : SizedBox.shrink(),
+          //   //Disapprove
+          //   Visibility(
+          //     visible: submission.submission_status == 'Pending' &&
+          //         widget.user.user_type == 'admin' &&
+          //         widget.submission.pending_for_head_driver == 0,
+          //     child: ButtonDialog(
+          //       label: 'Deny Trip',
+          //       fontColor: Colors.red,
+          //       onPressed: () {
+          //         showDialogDisapproveTrip();
+          //       },
+          //     ),
+          //   ),
 
-            ButtonDialog(
-              label: 'Dismiss',
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-          ],
+          //   //Cancel Trip
+          //   Visibility(
+          //     visible: submission.submission_status == 'Confirmed' &&
+          //         (widget.user.user_type == 'admin' ||
+          //             widget.user.head_driver == 1),
+          //     child: ButtonDialog(
+          //       label: 'Cancel Trip',
+          //       fontColor: Colors.red,
+          //       onPressed: () {
+          //         showDialogCancelTrip();
+          //       },
+          //     ),
+          //   ),
+
+          //   //Dismiss
+          //   // ButtonDialog(
+          //   //   label: 'Dismiss',
+          //   //   onPressed: () {
+          //   //     Navigator.pop(context);
+          //   //   },
+          //   // ),
+
+          //   // Complete Trip
+          //   submission.submission_status == 'Confirmed' &&
+          //           widget.user.user_type == 'driver'
+          //       ? ButtonDialog(
+          //           label: 'Confirm Trip Completion',
+          //           onPressed: () {
+          //             showDialogCompleteTrip();
+          //           },
+          //         )
+          //       : SizedBox.shrink(),
+          // ],
+          footerWidget: footer,
         );
       },
     );
@@ -343,6 +527,7 @@ class _BookingCardState extends State<BookingCard> {
       builder: (BuildContext context) {
         return DialogCustom(
           dialogTitle: 'Deny Trip Submission',
+          dialogColor: Colors.red,
           contentWidget: [
             SizedBox(width: MediaQuery.of(context).size.width),
             Text(
@@ -367,7 +552,7 @@ class _BookingCardState extends State<BookingCard> {
             ),
             ButtonDialog(
               label: 'Deny Submission',
-              fontColor: Theme.of(context).buttonColor,
+              fontColor: Colors.red,
               onPressed: () {
                 Map<String, dynamic> dataMap = {
                   DatabaseHelper.submission_status: 'Cancelled',
@@ -395,6 +580,66 @@ class _BookingCardState extends State<BookingCard> {
     );
   }
 
+  showDialogCancelTrip() {
+    TextEditingController contReason = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return DialogCustom(
+          dialogTitle: 'Cancel Trip',
+          dialogColor: Colors.red,
+          contentWidget: [
+            SizedBox(width: MediaQuery.of(context).size.width),
+            Text(
+              'Please give reason for cancelling this trip submission to let know the people involved in this trip.',
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 4.0),
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: "Reason for Cancelling Trip",
+                ),
+                controller: contReason,
+              ),
+            ),
+          ],
+          footerWidget: [
+            ButtonDialog(
+              label: 'Dismiss',
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            ButtonDialog(
+              label: 'Confirm Cancel',
+              fontColor: Colors.red,
+              onPressed: () {
+                Map<String, dynamic> dataMap = {
+                  DatabaseHelper.submission_status: 'Cancelled',
+                  DatabaseHelper.reason: contReason.text,
+                };
+
+                dbHelper.updateByHelperCustom(
+                  DatabaseHelper.tb_submission,
+                  DatabaseHelper.submission_id,
+                  widget.submission.submission_id,
+                  dataMap,
+                );
+
+                Fluttertoast.showToast(msg: 'Trip cancelled :(');
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/',
+                  ModalRoute.withName('/'),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   //head drivers assign driver & vehicle
   showDialogAssignDriverVehicle(
     List<User> driverList,
@@ -403,29 +648,6 @@ class _BookingCardState extends State<BookingCard> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        User defaultUser = User(
-          user_id: 0,
-          user_full_name: dropdownValueDriver,
-          password: dropdownValueDriver,
-          user_type: 'driver',
-          user_phone_number: dropdownValueDriver,
-          user_email: dropdownValueDriver,
-          user_delete_flag: 0,
-          head_driver: 0,
-          student_semester: 0,
-          student_id: dropdownValueDriver,
-          student_class: dropdownValueDriver,
-          user_session: 0,
-        );
-
-        Vehicle defaultVehicle = Vehicle(
-          vehicle_id: 0,
-          plat_no: dropdownValueVehicle,
-          passenger_no: 0,
-          vehicle_delete_flag: 0,
-          vehicle_type: 'van',
-        );
-
         driverList.insert(0, defaultUser);
         vehicleList.insert(0, defaultVehicle);
         return DialogCustom(
@@ -455,9 +677,9 @@ class _BookingCardState extends State<BookingCard> {
                           dropdownValueDriver = newValue;
                           dropDownState(() {
                             dropdownValueDriver = newValue;
-                            print(
-                              'DRIVER new value: $newValue ==> dropdown value: $dropdownValueDriver',
-                            );
+                            // print(
+                            //   'DRIVER new value: $newValue ==> dropdown value: $dropdownValueDriver',
+                            // );
                           });
                         },
                         items: driverList
@@ -494,9 +716,9 @@ class _BookingCardState extends State<BookingCard> {
                           dropdownValueVehicle = newValue;
                           dropDownState(() {
                             dropdownValueVehicle = newValue;
-                            print(
-                              'Vehicle new value: $newValue ==> dropdown value: $dropdownValueVehicle',
-                            );
+                            // print(
+                            //   'Vehicle new value: $newValue ==> dropdown value: $dropdownValueVehicle',
+                            // );
                           });
                         },
                         items: vehicleList
@@ -561,6 +783,56 @@ class _BookingCardState extends State<BookingCard> {
                   msg:
                       'Drivers $dropdownValueDriver & Vehicle $dropdownValueVehicle assigned to the trip! This trip now can be viewed at Confrimed tab on Booking List',
                 );
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/',
+                  ModalRoute.withName('/'),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  showDialogCompleteTrip() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return DialogCustom(
+          dialogTitle: 'Comfirm Trip Completion',
+          contentWidget: [
+            SizedBox(width: MediaQuery.of(context).size.width),
+            Text(
+              'By tapping on Confirm Complete you confirm that the trip is completed and the trip is execute as it meant to.',
+            ),
+          ],
+          footerWidget: [
+            ButtonDialog(
+              label: 'Dismiss',
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            ButtonDialog(
+              label: 'Confirm',
+              fontColor: Theme.of(context).buttonColor,
+              onPressed: () {
+                Map<String, dynamic> dataMap = {
+                  DatabaseHelper.submission_status: 'Completed'
+                };
+
+                dbHelper.updateByHelperCustom(
+                  DatabaseHelper.tb_submission,
+                  DatabaseHelper.submission_id,
+                  widget.submission.submission_id,
+                  dataMap,
+                );
+
+                Fluttertoast.showToast(
+                    msg:
+                        'Trip completed! Hope everybody arrived safe and sound!:)');
                 Navigator.pushNamedAndRemoveUntil(
                   context,
                   '/',
