@@ -17,6 +17,7 @@ class Submission {
   final int submission_admin_id;
   final int submission_driver_id;
   final int pending_for_head_driver;
+  final int person_num;
   final String reason;
   User admin;
   User driver;
@@ -39,6 +40,7 @@ class Submission {
     this.submission_admin_id,
     this.submission_driver_id,
     this.pending_for_head_driver,
+    this.person_num,
     this.reason,
     this.admin,
     this.driver,
@@ -76,6 +78,7 @@ class Submission {
     int submission_admin_id,
     int submission_driver_id,
     int pending_for_head_driver,
+    int person_num,
     String reason,
     User admin,
     User driver,
@@ -101,6 +104,7 @@ class Submission {
       submission_driver_id: submission_driver_id ?? this.submission_driver_id,
       pending_for_head_driver:
           pending_for_head_driver ?? this.pending_for_head_driver,
+      person_num: person_num ?? this.person_num,
       reason: reason ?? this.reason,
       admin: admin ?? this.admin,
       driver: driver ?? this.driver,
@@ -124,6 +128,7 @@ class Submission {
       'submission_admin_id': submission_admin_id,
       'submission_driver_id': submission_driver_id,
       'pending_for_head_driver': pending_for_head_driver,
+      'person_num': person_num,
       'reason': reason,
       'admin': admin?.toMap(),
       'driver': driver?.toMap(),
@@ -150,6 +155,7 @@ class Submission {
       submission_admin_id: map['submission_admin_id'],
       submission_driver_id: map['submission_driver_id'],
       pending_for_head_driver: map['pending_for_head_driver'],
+      person_num: map['person_num'],
       reason: map['reason'],
       admin: User.fromMap(map['admin']),
       driver: User.fromMap(map['driver']),
@@ -165,7 +171,7 @@ class Submission {
 
   @override
   String toString() {
-    return 'Submission(submission_id: $submission_id, submission_status: $submission_status, submission_location: $submission_location, companion_name: $companion_name, companion_phone_no: $companion_phone_no, companion_email: $companion_email, date_time_departure_to_location: $date_time_departure_to_location, date_time_departure_from_location: $date_time_departure_from_location, submission_delete_flag: $submission_delete_flag, submission_student_id: $submission_student_id, submission_admin_id: $submission_admin_id, submission_driver_id: $submission_driver_id, pending_for_head_driver: $pending_for_head_driver, reason: $reason, admin: $admin, driver: $driver, student: $student, vehicle: $vehicle)';
+    return 'Submission(submission_id: $submission_id, submission_status: $submission_status, submission_location: $submission_location, companion_name: $companion_name, companion_phone_no: $companion_phone_no, companion_email: $companion_email, date_time_departure_to_location: $date_time_departure_to_location, date_time_departure_from_location: $date_time_departure_from_location, submission_delete_flag: $submission_delete_flag, submission_student_id: $submission_student_id, submission_admin_id: $submission_admin_id, submission_driver_id: $submission_driver_id, pending_for_head_driver: $pending_for_head_driver, person_num: $person_num, reason: $reason, admin: $admin, driver: $driver, student: $student, vehicle: $vehicle)';
   }
 
   @override
@@ -187,6 +193,7 @@ class Submission {
         o.submission_admin_id == submission_admin_id &&
         o.submission_driver_id == submission_driver_id &&
         o.pending_for_head_driver == pending_for_head_driver &&
+        o.person_num == person_num &&
         o.reason == reason &&
         o.admin == admin &&
         o.driver == driver &&
@@ -209,6 +216,7 @@ class Submission {
         submission_admin_id.hashCode ^
         submission_driver_id.hashCode ^
         pending_for_head_driver.hashCode ^
+        person_num.hashCode ^
         reason.hashCode ^
         admin.hashCode ^
         driver.hashCode ^

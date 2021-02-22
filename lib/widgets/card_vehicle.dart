@@ -100,7 +100,7 @@ class _CardVehicleState extends State<CardVehicle> {
               text: widget.vehicle.plat_no,
             ),
             TitleAndText(
-              title: 'Passenger Number',
+              title: 'Passenger Number (Capacity)',
               text: widget.vehicle.passenger_no.toString(),
             ),
           ],
@@ -189,7 +189,7 @@ class _CardVehicleState extends State<CardVehicle> {
               padding: EdgeInsets.symmetric(vertical: 4.0),
               child: TextField(
                 decoration: InputDecoration(
-                  labelText: "Passenger Number",
+                  labelText: "Passenger Number (Capacity)",
                 ),
                 controller: _contPassengerNo,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],

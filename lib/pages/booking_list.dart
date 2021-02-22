@@ -54,192 +54,131 @@ class _BookingListState extends State<BookingList> {
         body: TabBarView(
           children: [
             // Pending
-            user.head_driver == 1 || user.user_type == 'admin'
-                ? FutureBuilder<List<Submission>>(
-                    future: dbHelper.getAllSubmission(
-                      submissionStatus:
-                          user.head_driver == 1 && user.user_type == 'driver'
-                              ? 'pending_for_head_driver'
-                              : 'Pending',
-                    ),
-                    builder: (context, snapshot) {
-                      print('pending snapshot: ${snapshot.data}');
-
-                      // return Text('${snapshot.data.toString()}');
-                      return snapshot.hasData
-                          ? ListView(
-                              padding: EdgeInsets.all(25),
-                              children:
-                                  List.generate(snapshot.data.length, (index) {
-                                Submission pendingSubmission =
-                                    snapshot.data[index];
-                                return BookingCard(
-                                  submission: pendingSubmission,
-                                  user: user,
-                                );
-                              }),
-                            )
-                          : Center(child: CupertinoActivityIndicator());
-                    },
-                  )
-                : FutureBuilder<List<Submission>>(
-                    future: dbHelper.getSubmissionByStudentId(
+            FutureBuilder<List<Submission>>(
+              future: user.head_driver == 1 || user.user_type == 'admin'
+                  ? dbHelper.getAllSubmission(
+                      submissionStatus: 'Pending',
+                    )
+                  : dbHelper.getSubmissionByStudentId(
                       studentId: user.user_id,
                       submissionStatus: 'Pending',
                     ),
-                    builder: (context, snapshot) {
-                      print('pending snapshot: ${snapshot.data}');
+              builder: (context, snapshot) {
+                // print('pending snapshot: ${snapshot.data}');
 
-                      return snapshot.hasData
-                          ? ListView(
-                              padding: EdgeInsets.all(25),
-                              children:
-                                  List.generate(snapshot.data.length, (index) {
-                                Submission pendingSubmission =
-                                    snapshot.data[index];
-                                return BookingCard(
-                                  submission: pendingSubmission,
-                                  user: user,
-                                );
-                              }),
-                            )
-                          : Center(child: CupertinoActivityIndicator());
-                    },
-                  ),
+                return snapshot.hasData
+                    ? ListView(
+                        padding: EdgeInsets.all(25),
+                        children: List.generate(snapshot.data.length, (index) {
+                          Submission pendingSubmission = snapshot.data[index];
+                          return BookingCard(
+                            submission: pendingSubmission,
+                            user: user,
+                          );
+                        }),
+                      )
+                    : Center(child: CupertinoActivityIndicator());
+              },
+            ),
+
             //Confirmed
-            user.head_driver == 1 || user.user_type == 'admin'
-                ? FutureBuilder<List<Submission>>(
-                    future: dbHelper.getAllSubmission(
-                        submissionStatus: 'Confirmed'),
-                    builder: (context, snapshot) {
-                      print('confirm snapshot: ${snapshot.data}');
+            FutureBuilder<List<Submission>>(
+              future: user.head_driver == 1 || user.user_type == 'admin'
+                  ? dbHelper.getAllSubmission(
+                      submissionStatus: 'Confirmed',
+                    )
+                  : user.user_type == 'student'
+                      ? dbHelper.getSubmissionByStudentId(
+                          studentId: user.user_id,
+                          submissionStatus: 'Confirmed',
+                        )
+                      : dbHelper.getSubmissionByDriverId(
+                          driverId: user.user_id,
+                          submissionStatus: 'Confirmed',
+                        ),
+              builder: (context, snapshot) {
+                // print('confirm snapshot: ${snapshot.data}');
 
-                      return snapshot.hasData
-                          ? ListView(
-                              padding: EdgeInsets.all(25),
-                              children:
-                                  List.generate(snapshot.data.length, (index) {
-                                Submission submission = snapshot.data[index];
-                                return BookingCard(
-                                  submission: submission,
-                                  user: user,
-                                );
-                              }),
-                            )
-                          : Center(child: CupertinoActivityIndicator());
-                    },
-                  )
-                : FutureBuilder<List<Submission>>(
-                    future: dbHelper.getSubmissionByStudentId(
-                        studentId: user.user_id, submissionStatus: 'Confirmed'),
-                    builder: (context, snapshot) {
-                      print('confirm snapshot: ${snapshot.data}');
+                return snapshot.hasData
+                    ? ListView(
+                        padding: EdgeInsets.all(25),
+                        children: List.generate(snapshot.data.length, (index) {
+                          Submission submission = snapshot.data[index];
+                          return BookingCard(
+                            submission: submission,
+                            user: user,
+                          );
+                        }),
+                      )
+                    : Center(child: CupertinoActivityIndicator());
+              },
+            ),
 
-                      return snapshot.hasData
-                          ? ListView(
-                              padding: EdgeInsets.all(25),
-                              children:
-                                  List.generate(snapshot.data.length, (index) {
-                                Submission submission = snapshot.data[index];
-                                return BookingCard(
-                                  submission: submission,
-                                  user: user,
-                                );
-                              }),
-                            )
-                          : Center(child: CupertinoActivityIndicator());
-                    },
-                  ),
             //Completed
-            user.head_driver == 1 || user.user_type == 'admin'
-                ? FutureBuilder<List<Submission>>(
-                    future: dbHelper.getAllSubmission(
+            FutureBuilder<List<Submission>>(
+              future: user.head_driver == 1 || user.user_type == 'admin'
+                  ? dbHelper.getAllSubmission(
                       submissionStatus: 'Completed',
-                    ),
-                    builder: (context, snapshot) {
-                      // print('confirm snapshot: ${snapshot.data}');
+                    )
+                  : user.user_type == 'student'
+                      ? dbHelper.getSubmissionByStudentId(
+                          studentId: user.user_id,
+                          submissionStatus: 'Completed',
+                        )
+                      : dbHelper.getSubmissionByDriverId(
+                          driverId: user.user_id,
+                          submissionStatus: 'Completed',
+                        ),
+              builder: (context, snapshot) {
+                // print('Completed snapshot: ${snapshot.data}');
 
-                      return snapshot.hasData
-                          ? ListView(
-                              padding: EdgeInsets.all(25),
-                              children:
-                                  List.generate(snapshot.data.length, (index) {
-                                Submission submission = snapshot.data[index];
-                                return BookingCard(
-                                  submission: submission,
-                                  user: user,
-                                );
-                              }),
-                            )
-                          : Center(child: CupertinoActivityIndicator());
-                    },
-                  )
-                : FutureBuilder<List<Submission>>(
-                    future: dbHelper.getSubmissionByStudentId(
-                        studentId: user.user_id, submissionStatus: 'Completed'),
-                    builder: (context, snapshot) {
-                      // print('completed snapshot: ${snapshot.data}');
+                return snapshot.hasData
+                    ? ListView(
+                        padding: EdgeInsets.all(25),
+                        children: List.generate(snapshot.data.length, (index) {
+                          Submission submission = snapshot.data[index];
+                          return BookingCard(
+                            submission: submission,
+                            user: user,
+                          );
+                        }),
+                      )
+                    : Center(child: CupertinoActivityIndicator());
+              },
+            ),
 
-                      return snapshot.hasData
-                          ? ListView(
-                              padding: EdgeInsets.all(25),
-                              children:
-                                  List.generate(snapshot.data.length, (index) {
-                                Submission submission = snapshot.data[index];
-                                return BookingCard(
-                                  submission: submission,
-                                  user: user,
-                                );
-                              }),
-                            )
-                          : Center(child: CupertinoActivityIndicator());
-                    },
-                  ),
             //Cancelled/Denied
-            user.head_driver == 1 || user.user_type == 'admin'
-                ? FutureBuilder<List<Submission>>(
-                    future: dbHelper.getAllSubmission(
+            FutureBuilder<List<Submission>>(
+              future: user.head_driver == 1 || user.user_type == 'admin'
+                  ? dbHelper.getAllSubmission(
                       submissionStatus: 'Cancelled',
-                    ),
-                    builder: (context, snapshot) {
-                      // print('confirm snapshot: ${snapshot.data}');
+                    )
+                  : user.user_type == 'student'
+                      ? dbHelper.getSubmissionByStudentId(
+                          studentId: user.user_id,
+                          submissionStatus: 'Cancelled',
+                        )
+                      : dbHelper.getSubmissionByDriverId(
+                          driverId: user.user_id,
+                          submissionStatus: 'Cancelled',
+                        ),
+              builder: (context, snapshot) {
+                // print('Cancelled snapshot: ${snapshot.data}');
 
-                      return snapshot.hasData
-                          ? ListView(
-                              padding: EdgeInsets.all(25),
-                              children:
-                                  List.generate(snapshot.data.length, (index) {
-                                Submission submission = snapshot.data[index];
-                                return BookingCard(
-                                  submission: submission,
-                                  user: user,
-                                );
-                              }),
-                            )
-                          : Center(child: CupertinoActivityIndicator());
-                    },
-                  )
-                : FutureBuilder<List<Submission>>(
-                    future: dbHelper.getSubmissionByStudentId(
-                        studentId: user.user_id, submissionStatus: 'Cancelled'),
-                    builder: (context, snapshot) {
-                      // print('cancelled snapshot: ${snapshot.data}');
-
-                      return snapshot.hasData
-                          ? ListView(
-                              padding: EdgeInsets.all(25),
-                              children:
-                                  List.generate(snapshot.data.length, (index) {
-                                Submission submission = snapshot.data[index];
-                                return BookingCard(
-                                  submission: submission,
-                                  user: user,
-                                );
-                              }),
-                            )
-                          : Center(child: CupertinoActivityIndicator());
-                    },
-                  ),
+                return snapshot.hasData
+                    ? ListView(
+                        padding: EdgeInsets.all(25),
+                        children: List.generate(snapshot.data.length, (index) {
+                          Submission submission = snapshot.data[index];
+                          return BookingCard(
+                            submission: submission,
+                            user: user,
+                          );
+                        }),
+                      )
+                    : Center(child: CupertinoActivityIndicator());
+              },
+            )
           ],
         ),
       ),

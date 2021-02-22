@@ -155,11 +155,11 @@ class DatabaseHelper {
     DatabaseHelper.companion_name: 'sub1',
     DatabaseHelper.companion_phone_no: 'sub1',
     DatabaseHelper.companion_email: 'sub1',
-    DatabaseHelper.submission_student_id: 4,
+    DatabaseHelper.submission_student_id: 1,
     DatabaseHelper.date_time_departure_to_location:
-        DateFormat('dd/MM/yyyy – kk:mm').format(DateTime.now()).toString(),
+        DateFormat('yyyy-MM-dd hh:mm').format(DateTime.now()).toString(),
     DatabaseHelper.date_time_departure_from_location:
-        DateFormat('dd/MM/yyyy – kk:mm').format(DateTime.now()).toString(),
+        DateFormat('yyyy-MM-dd hh:mm').format(DateTime.now()).toString(),
   };
 
   Map<String, dynamic> submission2 = {
@@ -168,11 +168,26 @@ class DatabaseHelper {
     DatabaseHelper.companion_name: 'sub2',
     DatabaseHelper.companion_phone_no: 'sub2',
     DatabaseHelper.companion_email: 'sub2',
-    DatabaseHelper.submission_student_id: 4,
+    DatabaseHelper.submission_student_id: 1,
     DatabaseHelper.date_time_departure_to_location:
-        DateFormat('dd/MM/yyyy – kk:mm').format(DateTime.now()).toString(),
+        DateFormat('yyyy-MM-dd hh:mm').format(DateTime.now()).toString(),
     DatabaseHelper.date_time_departure_from_location:
-        DateFormat('dd/MM/yyyy – kk:mm').format(DateTime.now()).toString(),
+        DateFormat('yyyy-MM-dd hh:mm').format(DateTime.now()).toString(),
+  };
+
+  Map<String, dynamic> submission3 = {
+    DatabaseHelper.submission_location: 'sub3',
+    DatabaseHelper.person_num: 101,
+    DatabaseHelper.companion_name: 'sub3',
+    DatabaseHelper.companion_phone_no: 'sub3',
+    DatabaseHelper.companion_email: 'sub3',
+    DatabaseHelper.submission_student_id: 1,
+    DatabaseHelper.date_time_departure_to_location:
+        DateFormat('yyyy-MM-dd hh:mm')
+            .format(DateTime.now().subtract(Duration()))
+            .toString(),
+    DatabaseHelper.date_time_departure_from_location:
+        DateFormat('yyyy-MM-dd hh:mm').format(DateTime.now()).toString(),
   };
 
   // make this a singleton class
@@ -473,6 +488,82 @@ class DatabaseHelper {
     return submission;
   }
 
+  Future<List<Submission>> getSubmissionByDriverId({
+    int driverId,
+    String submissionStatus = 'Pending',
+  }) async {
+    Database db = await instance.database;
+
+    // print('entering getSubmissionByStudentEmail()');
+    var res = await db.rawQuery(
+        "SELECT * FROM $tb_submission WHERE $submission_driver_id = '${driverId.toString()}' and $submission_status = '$submissionStatus'");
+
+    // print('inserted data: ${studentId.toString()} & $submission_status');
+    // print('data $res');
+
+    if (res.length < 0) {
+      print('couldnt find the submission dumbass');
+      return null;
+    }
+
+    List<Submission> submission = [];
+    res.forEach((sub) {
+      submission.add(Submission.fromMap(sub));
+    });
+
+    // print('data submission: $submission');
+    return submission;
+  }
+
+  // List<Submission> getConfirmedSubmissionByStudentId(int studentId) {
+  //   getSubmissionByStudentId(
+  //           studentId: studentId, submissionStatus: 'Confirmed')
+  //       .then((value) {
+  //     return value;
+  //   });
+  // }
+
+  Map<DateTime, List> getConfirmedSubmission(int studentId) {}
+
+  Future<User> getCurrentUser() async {
+    Database db = await instance.database;
+
+    var res =
+        await db.rawQuery("SELECT * FROM $tb_user WHERE $user_session = 1");
+
+    if (res.length < 0) {
+      return null;
+    }
+
+    return User.fromMap(res.first);
+  }
+
+  Future<List<Submission>> getAllSubmissionByStudentId({
+    int studentId,
+  }) async {
+    Database db = await instance.database;
+
+    // print('entering getSubmissionByStudentEmail()');
+    var res = await db.rawQuery(
+        "SELECT * FROM $tb_submission WHERE $submission_student_id = '${studentId.toString()}'");
+
+    // print('inserted data: ${studentId.toString()} & $submission_status');
+    // print('data $res');
+
+    if (res.length < 0) {
+      print('couldnt find the submission dumbass');
+      return null;
+    }
+
+    List<Submission> submission = [];
+    res.forEach((sub) {
+      submission.add(Submission.fromMap(sub));
+    });
+
+    // print('data submission: $submission');
+    return submission;
+  }
+
   Future<List<Submission>> getAllSubmission({
     String submissionStatus = 'Pending',
   }) async {
@@ -483,7 +574,7 @@ class DatabaseHelper {
         "SELECT * FROM $tb_submission WHERE $submission_status = '$submissionStatus'");
 
     // print('inserted data: ${studentId.toString()} & $submission_status');
-    print('xx data: $res');
+    // print('xx data: $res');
 
     // res.forEach((map) {
     //   map.forEach((key, value) {
