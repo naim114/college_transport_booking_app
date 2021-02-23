@@ -121,7 +121,7 @@ class _BookingCardState extends State<BookingCard> {
                         ),
                         WidgetSpan(child: SizedBox(width: 7)),
                         TextSpan(
-                          text: DateFormat('dd-MM-yyy kk:mm')
+                          text: DateFormat('d MMMM yyyy kk:mm')
                               .format(DateTime.parse(widget
                                   .submission.date_time_departure_to_location))
                               .toString(),
@@ -206,14 +206,17 @@ class _BookingCardState extends State<BookingCard> {
               future: dbHelper.getAllDriversAndVehicle(),
               builder: (context, snapshot) {
                 // List<User> driverList = snapshot.data;
-                List<List<dynamic>> driversVehicleList = snapshot.data;
+                List<List<dynamic>> driversVehicleList = [];
+                List<User> driverList = [];
+                List<Vehicle> vehicleList = [];
 
+                if (snapshot.hasData) {
+                  driversVehicleList = snapshot.data;
+                }
                 // driversVehicleList.forEach((list) {
                 //   print('${list.runtimeType} ---- $list');
                 // });
 
-                List<User> driverList = [];
-                List<Vehicle> vehicleList = [];
                 driversVehicleList.forEach((list) {
                   if (list is List<User>) {
                     driverList = list;
@@ -221,6 +224,9 @@ class _BookingCardState extends State<BookingCard> {
                     vehicleList = list;
                   }
                 });
+
+                driverList.insert(0, defaultUser);
+                vehicleList.insert(0, defaultVehicle);
 
                 return snapshot.hasData
                     ? ButtonDialog(
@@ -344,14 +350,14 @@ class _BookingCardState extends State<BookingCard> {
             ),
             TitleAndText(
               title: 'Departure From College to Location',
-              text: DateFormat('dd-MM-yyy kk:mm')
+              text: DateFormat('d MMMM yyyy kk:mm')
                   .format(DateTime.parse(
                       submission.date_time_departure_to_location))
                   .toString(),
             ),
             TitleAndText(
               title: 'Departure From Location to College',
-              text: DateFormat('dd-MM-yyy kk:mm')
+              text: DateFormat('d MMMM yyyy kk:mm')
                   .format(DateTime.parse(
                       submission.date_time_departure_from_location))
                   .toString(),
@@ -640,7 +646,7 @@ class _BookingCardState extends State<BookingCard> {
     );
   }
 
-  //head drivers assign driver & vehicle
+  //head drivers & admin assign driver & vehicle
   showDialogAssignDriverVehicle(
     List<User> driverList,
     List<Vehicle> vehicleList,
@@ -648,8 +654,6 @@ class _BookingCardState extends State<BookingCard> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        driverList.insert(0, defaultUser);
-        vehicleList.insert(0, defaultVehicle);
         return DialogCustom(
           dialogTitle: 'Assign Drivers & Vehicle',
           contentWidget: [
@@ -756,8 +760,48 @@ class _BookingCardState extends State<BookingCard> {
                 User selectedDriver =
                     await dbHelper.getUserByEmail(dropdownValueDriver);
 
-                // Vehicle selectedVehicle =
-                //     await dbHelper.getVehicleByPlatNo(dropdownValueVehicle);
+                Vehicle selectedVehicle =
+                    await dbHelper.getVehicleByPlatNo(dropdownValueVehicle);
+
+                List<Submission> driverConfirmedDates =
+                    await dbHelper.getSubmissionByDriverId(
+                        driverId: selectedDriver.user_id,
+                        submissionStatus: 'Confirmed');
+
+                // if (selectedVehicle.passenger_no <
+                //     widget.submission.person_num) {
+                //   Fluttertoast.showToast(
+                //       msg:
+                //           'This vehicle does not have enough space for this trip passenger number. ${selectedVehicle.plat_no} has only space for ${selectedVehicle.passenger_no} and the trip involves ${widget.submission.person_num} people.');
+                //   return false;
+                // }
+
+                driverConfirmedDates.forEach((driverSub) {
+                  DateTime toLocation =
+                      DateTime.parse(driverSub.date_time_departure_to_location);
+                  DateTime fromLocation = DateTime.parse(
+                      driverSub.date_time_departure_from_location);
+
+                  DateTime subDateToLocation = DateTime.parse(
+                      widget.submission.date_time_departure_to_location);
+                  DateTime subDateFromLocation = DateTime.parse(
+                      widget.submission.date_time_departure_from_location);
+
+                  if (DateTime(subDateToLocation.year, subDateToLocation.month,
+                              subDateToLocation.day) ==
+                          DateTime(toLocation.year, toLocation.month,
+                              toLocation.day) ||
+                      DateTime(
+                              subDateFromLocation.year,
+                              subDateFromLocation.month,
+                              subDateFromLocation.day) ==
+                          DateTime(fromLocation.year, fromLocation.month,
+                              fromLocation.day)) {
+                    Fluttertoast.showToast(msg: 'its good');
+
+                    showDialogDriverBz(selectedDriver);
+                  }
+                });
 
                 Map<String, dynamic> dataMap = {
                   DatabaseHelper.submission_driver_id: selectedDriver.user_id,
@@ -833,6 +877,66 @@ class _BookingCardState extends State<BookingCard> {
                 Fluttertoast.showToast(
                     msg:
                         'Trip completed! Hope everybody arrived safe and sound!:)');
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/',
+                  ModalRoute.withName('/'),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  showDialogDriverBz(User selectedDriver) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return DialogCustom(
+          dialogTitle: 'Driver Occupied On this Date',
+          contentWidget: [
+            SizedBox(width: MediaQuery.of(context).size.width),
+            Text(
+              'Driver already has confirmed trip on this date (${DateFormat('d MMMM yyyy kk:mm').format(DateTime.parse(widget.submission.date_time_departure_to_location)).toString()}) are you sure you want to assign to this driver anyway?',
+            ),
+          ],
+          footerWidget: [
+            ButtonDialog(
+              label: 'Dismiss',
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            ButtonDialog(
+              label: 'Confirm',
+              fontColor: Theme.of(context).buttonColor,
+              onPressed: () {
+                Map<String, dynamic> dataMap = {
+                  DatabaseHelper.submission_driver_id: selectedDriver.user_id,
+                  DatabaseHelper.plat_no: dropdownValueVehicle,
+                  DatabaseHelper.submission_status: 'Confirmed',
+                };
+
+                // dataMap.values.forEach((element) {
+                //   print('$element ==> ${element.runtimeType}');
+                // });
+
+                dbHelper.updateByHelperCustom(
+                  DatabaseHelper.tb_submission,
+                  DatabaseHelper.submission_id,
+                  widget.submission.submission_id,
+                  dataMap,
+                );
+
+                // print('selectedDriver: ${selectedDriver.user_id}');
+                // print('selectedVehicle: ${selectedVehicle.vehicle_id}');
+
+                Fluttertoast.showToast(
+                  msg:
+                      'Drivers $dropdownValueDriver & Vehicle $dropdownValueVehicle assigned to the trip! This trip now can be viewed at Confrimed tab on Booking List',
+                );
                 Navigator.pushNamedAndRemoveUntil(
                   context,
                   '/',

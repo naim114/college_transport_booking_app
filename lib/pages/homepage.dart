@@ -28,10 +28,14 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
   final contCompanionName = TextEditingController();
   final contCompanionPhoneNumber = TextEditingController();
   final contCompanionEmail = TextEditingController();
-  DateTime _selectedDateCollegeToLocation = DateTime.now();
-  DateTime _selectedTimeCollegeToLocation = DateTime.now();
-  DateTime _selectedDateLocationToCollege = DateTime.now();
-  DateTime _selectedTimeLocationToCollege = DateTime.now();
+  DateTime _selectedDateCollegeToLocation =
+      DateTime.now().add(Duration(days: 7));
+  DateTime _selectedTimeCollegeToLocation =
+      DateTime.now().add(Duration(days: 7));
+  DateTime _selectedDateLocationToCollege =
+      DateTime.now().add(Duration(days: 7));
+  DateTime _selectedTimeLocationToCollege =
+      DateTime.now().add(Duration(days: 7));
 
   @override
   void dispose() {
