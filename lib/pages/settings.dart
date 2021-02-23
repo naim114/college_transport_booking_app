@@ -40,18 +40,18 @@ class Settings extends StatelessWidget {
               dbHelper.printAllData();
             },
           ),
-          IconButton(
-            icon: Icon(
-              Icons.remove_circle_outline,
-              color: Colors.red,
-            ),
-            onPressed: () async {
-              print('current user id ${user.user_id}');
-              List<Submission> newSub = await dbHelper.getAllSubmission(
-                  submissionStatus: 'Confirmed');
-              print('getAllSubmission: ${newSub.toString()}');
-            },
-          ),
+          // IconButton(
+          //   icon: Icon(
+          //     Icons.remove_circle_outline,
+          //     color: Colors.red,
+          //   ),
+          //   onPressed: () async {
+          //     print('current user id ${user.user_id}');
+          //     List<Submission> newSub = await dbHelper.getAllSubmission(
+          //         submissionStatus: 'Confirmed');
+          //     print('getAllSubmission: ${newSub.toString()}');
+          //   },
+          // ),
         ],
       ),
       body: Container(
