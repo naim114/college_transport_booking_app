@@ -12,6 +12,7 @@ class Submission {
   final String companion_email;
   final String date_time_departure_to_location;
   final String date_time_departure_from_location;
+  final String plat_no;
   final int submission_delete_flag;
   final int submission_student_id;
   final int submission_admin_id;
@@ -35,6 +36,7 @@ class Submission {
     this.companion_email,
     this.date_time_departure_to_location,
     this.date_time_departure_from_location,
+    this.plat_no,
     this.submission_delete_flag,
     this.submission_student_id,
     this.submission_admin_id,
@@ -73,6 +75,7 @@ class Submission {
     String companion_email,
     String date_time_departure_to_location,
     String date_time_departure_from_location,
+    String plat_no,
     int submission_delete_flag,
     int submission_student_id,
     int submission_admin_id,
@@ -96,6 +99,7 @@ class Submission {
           this.date_time_departure_to_location,
       date_time_departure_from_location: date_time_departure_from_location ??
           this.date_time_departure_from_location,
+      plat_no: plat_no ?? this.plat_no,
       submission_delete_flag:
           submission_delete_flag ?? this.submission_delete_flag,
       submission_student_id:
@@ -123,6 +127,7 @@ class Submission {
       'companion_email': companion_email,
       'date_time_departure_to_location': date_time_departure_to_location,
       'date_time_departure_from_location': date_time_departure_from_location,
+      'plat_no': plat_no,
       'submission_delete_flag': submission_delete_flag,
       'submission_student_id': submission_student_id,
       'submission_admin_id': submission_admin_id,
@@ -150,6 +155,7 @@ class Submission {
       date_time_departure_to_location: map['date_time_departure_to_location'],
       date_time_departure_from_location:
           map['date_time_departure_from_location'],
+      plat_no: map['plat_no'],
       submission_delete_flag: map['submission_delete_flag'],
       submission_student_id: map['submission_student_id'],
       submission_admin_id: map['submission_admin_id'],
@@ -171,7 +177,7 @@ class Submission {
 
   @override
   String toString() {
-    return 'Submission(submission_id: $submission_id, submission_status: $submission_status, submission_location: $submission_location, companion_name: $companion_name, companion_phone_no: $companion_phone_no, companion_email: $companion_email, date_time_departure_to_location: $date_time_departure_to_location, date_time_departure_from_location: $date_time_departure_from_location, submission_delete_flag: $submission_delete_flag, submission_student_id: $submission_student_id, submission_admin_id: $submission_admin_id, submission_driver_id: $submission_driver_id, pending_for_head_driver: $pending_for_head_driver, person_num: $person_num, reason: $reason, admin: $admin, driver: $driver, student: $student, vehicle: $vehicle)';
+    return 'Submission(submission_id: $submission_id, submission_status: $submission_status, submission_location: $submission_location, companion_name: $companion_name, companion_phone_no: $companion_phone_no, companion_email: $companion_email, date_time_departure_to_location: $date_time_departure_to_location, date_time_departure_from_location: $date_time_departure_from_location, plat_no: $plat_no, submission_delete_flag: $submission_delete_flag, submission_student_id: $submission_student_id, submission_admin_id: $submission_admin_id, submission_driver_id: $submission_driver_id, pending_for_head_driver: $pending_for_head_driver, person_num: $person_num, reason: $reason, admin: $admin, driver: $driver, student: $student, vehicle: $vehicle)';
   }
 
   @override
@@ -188,6 +194,7 @@ class Submission {
         o.date_time_departure_to_location == date_time_departure_to_location &&
         o.date_time_departure_from_location ==
             date_time_departure_from_location &&
+        o.plat_no == plat_no &&
         o.submission_delete_flag == submission_delete_flag &&
         o.submission_student_id == submission_student_id &&
         o.submission_admin_id == submission_admin_id &&
@@ -211,6 +218,7 @@ class Submission {
         companion_email.hashCode ^
         date_time_departure_to_location.hashCode ^
         date_time_departure_from_location.hashCode ^
+        plat_no.hashCode ^
         submission_delete_flag.hashCode ^
         submission_student_id.hashCode ^
         submission_admin_id.hashCode ^
