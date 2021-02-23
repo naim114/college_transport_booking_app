@@ -278,7 +278,10 @@ class _BookingCardState extends State<BookingCard> {
                     future:
                         dbHelper.getUserById(submission.submission_student_id),
                     builder: (context, snapshot) {
-                      User student = snapshot.data;
+                      User student;
+                      if (snapshot.hasData) {
+                        student = snapshot.data;
+                      }
                       return snapshot.hasData
                           ? Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -306,7 +309,10 @@ class _BookingCardState extends State<BookingCard> {
                     future:
                         dbHelper.getUserById(submission.submission_driver_id),
                     builder: (context, snapshot) {
-                      User driver = snapshot.data;
+                      User driver;
+                      if (snapshot.hasData) {
+                        driver = snapshot.data;
+                      }
                       return snapshot.hasData
                           ? Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -327,6 +333,12 @@ class _BookingCardState extends State<BookingCard> {
                             )
                           : CupertinoActivityIndicator();
                     })
+                : SizedBox.shrink(),
+            submission.plat_no != null
+                ? TitleAndText(
+                    title: 'Vehicle',
+                    text: submission.plat_no,
+                  )
                 : SizedBox.shrink(),
             TitleAndText(
               title: 'Location',
@@ -768,24 +780,30 @@ class _BookingCardState extends State<BookingCard> {
                         driverId: selectedDriver.user_id,
                         submissionStatus: 'Confirmed');
 
-                // if (selectedVehicle.passenger_no <
-                //     widget.submission.person_num) {
-                //   Fluttertoast.showToast(
-                //       msg:
-                //           'This vehicle does not have enough space for this trip passenger number. ${selectedVehicle.plat_no} has only space for ${selectedVehicle.passenger_no} and the trip involves ${widget.submission.person_num} people.');
-                //   return false;
-                // }
+                List<Submission> vehicleConfirmedDates =
+                    await dbHelper.getVehicleSubmission(
+                        platNo: selectedVehicle.plat_no,
+                        subStatus: 'Confirmed');
+
+                // TODO when all said and done open below comment
+                if (selectedVehicle.passenger_no <
+                    widget.submission.person_num) {
+                  Fluttertoast.showToast(
+                      msg:
+                          'This vehicle does not have enough space for this trip passenger number. ${selectedVehicle.plat_no} has only space for ${selectedVehicle.passenger_no} and the trip involves ${widget.submission.person_num} people.');
+                  return false;
+                }
+
+                DateTime subDateToLocation = DateTime.parse(
+                    widget.submission.date_time_departure_to_location);
+                DateTime subDateFromLocation = DateTime.parse(
+                    widget.submission.date_time_departure_from_location);
 
                 driverConfirmedDates.forEach((driverSub) {
                   DateTime toLocation =
                       DateTime.parse(driverSub.date_time_departure_to_location);
                   DateTime fromLocation = DateTime.parse(
                       driverSub.date_time_departure_from_location);
-
-                  DateTime subDateToLocation = DateTime.parse(
-                      widget.submission.date_time_departure_to_location);
-                  DateTime subDateFromLocation = DateTime.parse(
-                      widget.submission.date_time_departure_from_location);
 
                   if (DateTime(subDateToLocation.year, subDateToLocation.month,
                               subDateToLocation.day) ==
@@ -797,7 +815,31 @@ class _BookingCardState extends State<BookingCard> {
                               subDateFromLocation.day) ==
                           DateTime(fromLocation.year, fromLocation.month,
                               fromLocation.day)) {
-                    Fluttertoast.showToast(msg: 'its good');
+                    Fluttertoast.showToast(
+                        msg: 'Driver already has confirmed trip on this date');
+
+                    showDialogDriverBz(selectedDriver);
+                  }
+                });
+
+                vehicleConfirmedDates.forEach((vehicleSub) {
+                  DateTime toLocation = DateTime.parse(
+                      vehicleSub.date_time_departure_to_location);
+                  DateTime fromLocation = DateTime.parse(
+                      vehicleSub.date_time_departure_from_location);
+
+                  if (DateTime(subDateToLocation.year, subDateToLocation.month,
+                              subDateToLocation.day) ==
+                          DateTime(toLocation.year, toLocation.month,
+                              toLocation.day) ||
+                      DateTime(
+                              subDateFromLocation.year,
+                              subDateFromLocation.month,
+                              subDateFromLocation.day) ==
+                          DateTime(fromLocation.year, fromLocation.month,
+                              fromLocation.day)) {
+                    Fluttertoast.showToast(
+                        msg: 'Vehicle already has confirmed trip on this date');
 
                     showDialogDriverBz(selectedDriver);
                   }

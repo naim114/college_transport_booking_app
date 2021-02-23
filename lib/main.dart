@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 
 // TODO try fix the ConcurrentModificationError, problem occurs when add list before build complete, look up build finish callback (?), try not to setstate inside inistate
 // at homepage, wrap calendar with future builder and return the subList based on condition
-// TODO apparently this still not correct, error when that date have more than 3 trip
+// TODO apparently this still not correct, error when that there is two date that have two or more events
+
 // TODO when assigning driver & vehicle if the driver & vehicle is unavailable on that date return false
 // dah buat maybe salah dekat year, month, date condition
 

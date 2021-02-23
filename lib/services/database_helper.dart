@@ -157,9 +157,13 @@ class DatabaseHelper {
     DatabaseHelper.companion_email: 'sub1',
     DatabaseHelper.submission_student_id: 1,
     DatabaseHelper.date_time_departure_to_location:
-        DateFormat('yyyy-MM-dd hh:mm').format(DateTime.now()).toString(),
+        DateFormat('yyyy-MM-dd hh:mm')
+            .format(DateTime.now().add(Duration(days: 7)))
+            .toString(),
     DatabaseHelper.date_time_departure_from_location:
-        DateFormat('yyyy-MM-dd hh:mm').format(DateTime.now()).toString(),
+        DateFormat('yyyy-MM-dd hh:mm')
+            .format(DateTime.now().add(Duration(days: 7)))
+            .toString(),
   };
 
   Map<String, dynamic> submission2 = {
@@ -170,9 +174,13 @@ class DatabaseHelper {
     DatabaseHelper.companion_email: 'sub2',
     DatabaseHelper.submission_student_id: 1,
     DatabaseHelper.date_time_departure_to_location:
-        DateFormat('yyyy-MM-dd hh:mm').format(DateTime.now()).toString(),
+        DateFormat('yyyy-MM-dd hh:mm')
+            .format(DateTime.now().add(Duration(days: 7)))
+            .toString(),
     DatabaseHelper.date_time_departure_from_location:
-        DateFormat('yyyy-MM-dd hh:mm').format(DateTime.now()).toString(),
+        DateFormat('yyyy-MM-dd hh:mm')
+            .format(DateTime.now().add(Duration(days: 7)))
+            .toString(),
   };
 
   Map<String, dynamic> submission3 = {
@@ -184,10 +192,12 @@ class DatabaseHelper {
     DatabaseHelper.submission_student_id: 1,
     DatabaseHelper.date_time_departure_to_location:
         DateFormat('yyyy-MM-dd hh:mm')
-            .format(DateTime.now().subtract(Duration()))
+            .format(DateTime.now().add(Duration(days: 7)))
             .toString(),
     DatabaseHelper.date_time_departure_from_location:
-        DateFormat('yyyy-MM-dd hh:mm').format(DateTime.now()).toString(),
+        DateFormat('yyyy-MM-dd hh:mm')
+            .format(DateTime.now().add(Duration(days: 7)))
+            .toString(),
   };
 
   // make this a singleton class
@@ -280,6 +290,10 @@ class DatabaseHelper {
     await db.insert(DatabaseHelper.tb_vehicle, van1);
     await db.insert(DatabaseHelper.tb_submission, submission1);
     await db.insert(DatabaseHelper.tb_submission, submission2);
+    await db.insert(DatabaseHelper.tb_submission, submission3);
+    await db.insert(DatabaseHelper.tb_submission, submission1);
+    await db.insert(DatabaseHelper.tb_submission, submission2);
+    await db.insert(DatabaseHelper.tb_submission, submission3);
 
     print('****************ALL TABLES CREATION SUCCESSFUL*****************');
   }
@@ -366,6 +380,11 @@ class DatabaseHelper {
   Future<int> delete(String tableName, String columnId, int id) async {
     Database db = await instance.database;
     return await db.delete(tableName, where: '$columnId = ?', whereArgs: [id]);
+  }
+
+  Future<int> deleteTable(String tableName) async {
+    Database db = await instance.database;
+    return await db.delete(tableName);
   }
 
   // Future<int> deleteAllVehicle() async {
@@ -614,6 +633,29 @@ class DatabaseHelper {
     });
 
     print('data submission getAllSubmissionByStatus():  $submission');
+    return submission;
+  }
+
+  Future<List<Submission>> getVehicleSubmission({
+    String subStatus = 'Pending',
+    String platNo,
+  }) async {
+    Database db = await instance.database;
+
+    var res = await db.rawQuery(
+        "SELECT * FROM $tb_submission WHERE $submission_driver_id = '$platNo' and $submission_status = '$subStatus'");
+
+    if (res.length < 0) {
+      print('couldnt find the submission dumbass');
+      return null;
+    }
+
+    List<Submission> submission = [];
+    res.forEach((sub) {
+      submission.add(Submission.fromMap(sub));
+    });
+
+    print('data submission getVehicleSubmission():  $submission');
     return submission;
   }
 
