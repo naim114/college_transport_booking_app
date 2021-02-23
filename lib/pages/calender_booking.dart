@@ -186,14 +186,16 @@ class _CalenderBookingState extends State<CalenderBooking>
       // WidgetsBinding.instance.addPostFrameCallback((_) {
       //   setState(() {
       //     _events[reformatDate] = [subList.first];
-      //   });
+      //   });0
       // });
 
       // Future.delayed(Duration.zero, () => _getConfirmedTripForCalender());
       // WidgetsBinding.instance
       //     .addPostFrameCallback((_) => _events[reformatDate] = [subList.first]);
     }
+    // _events[DateTime(2013, 9, 7)] = ['none'];
     _events.forEach((key, value) {
+      value = List<dynamic>.filled(3, 0, growable: true);
       subList.forEach((sub) {
         // List<dynamic> listToAdd = _events[key];
 
